@@ -1,0 +1,6 @@
+{
+  "name": "Universidad de Chile",
+  "description": "Aplicación del plantel de Universidad de Chile con gestión de 10 jugadores, evaluaciones técnica, táctica y condicional, y persistencia en Supabase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
