@@ -115,11 +115,16 @@ export const PlayerHistoryModal: React.FC<PlayerHistoryModalProps> = ({
   // Calculate Match Stats for this player
   const playerMatchStats = matchStats.filter((s) => s.jugadorId === player.id);
   const totalMatchesPlayed = playerMatchStats.filter(
-    (s) => s.condicionJugador === 'Titular' || (s.condicionJugador === 'Suplente' && s.minutosJugados > 0)
+    (s) =>
+      s.condicionJugador === 'Titular' ||
+      ((s.condicionJugador === 'Suplente que ingresa' || s.condicionJugador === 'Suplente') &&
+        s.minutosJugados > 0)
   ).length;
   const totalStarter = playerMatchStats.filter((s) => s.condicionJugador === 'Titular').length;
   const totalSub = playerMatchStats.filter(
-    (s) => s.condicionJugador === 'Suplente' && s.minutosJugados > 0
+    (s) =>
+      (s.condicionJugador === 'Suplente que ingresa' || s.condicionJugador === 'Suplente') &&
+      s.minutosJugados > 0
   ).length;
   const totalMinutes = playerMatchStats.reduce((acc, s) => acc + (s.minutosJugados || 0), 0);
   const totalGoals = playerMatchStats.reduce((acc, s) => acc + (s.goles || 0), 0);
@@ -915,9 +920,15 @@ export const PlayerHistoryModal: React.FC<PlayerHistoryModalProps> = ({
                               className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
                                 stat.condicionJugador === 'Titular'
                                   ? 'bg-emerald-600/30 text-emerald-400 border-emerald-500'
-                                  : stat.condicionJugador === 'Suplente'
-                                    ? 'bg-amber-500/20 text-amber-400 border-amber-500/60'
-                                    : 'bg-slate-600/30 text-slate-400 border-slate-500'
+                                  : stat.condicionJugador === 'Suplente que ingresa' || stat.condicionJugador === 'Suplente'
+                                    ? 'bg-blue-600/30 text-blue-400 border-blue-500'
+                                    : stat.condicionJugador === 'Suplente que no ingresa'
+                                      ? 'bg-slate-700/30 text-slate-300 border-slate-600'
+                                      : stat.condicionJugador === 'Suspendido'
+                                        ? 'bg-amber-600/30 text-amber-400 border-amber-500'
+                                        : stat.condicionJugador === 'Lesionado'
+                                          ? 'bg-rose-600/30 text-rose-400 border-rose-500'
+                                          : 'bg-zinc-700/30 text-zinc-400 border-zinc-600'
                               }`}
                             >
                               {stat.condicionJugador}

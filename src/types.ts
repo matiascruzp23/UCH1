@@ -37,7 +37,39 @@ export interface Match {
   notas?: string;
 }
 
-export type PlayerMatchCondition = 'Titular' | 'Suplente' | 'No convocado';
+export type PlayerMatchCondition =
+  | 'Titular'
+  | 'Suplente que ingresa'
+  | 'Suplente que no ingresa'
+  | 'No citado'
+  | 'Suspendido'
+  | 'Lesionado'
+  | 'Suplente'
+  | 'No convocado';
+
+export interface PitchSlot {
+  slotId: string;
+  posicionTag: string; // 'PO', 'DFC', 'LD', 'LI', 'MCD', 'MC', 'MCO', 'ED', 'EI', 'DC'
+  label: string;
+  x: number; // Percentage 0 - 100
+  y: number; // Percentage 0 - 100
+  jugadorId?: string;
+}
+
+export interface Match {
+  id: string;
+  rival: string;
+  fecha: string; // YYYY-MM-DD
+  torneo: string; // e.g., 'Campeonato Nacional', 'Copa Chile', 'Copa Libertadores', 'Amistoso'
+  condicion: 'Local' | 'Visita';
+  golesFavor: number;
+  golesContra: number;
+  estadio?: string;
+  jornada?: string; // e.g., 'Fecha 1', 'Fecha 2', 'Clásico'
+  notas?: string;
+  formacion?: string; // e.g., '4-3-3', '4-4-2', '4-2-3-1', '3-5-2', '5-3-2', '3-4-3'
+  titularesSlots?: Record<string, string>; // slotId -> jugadorId
+}
 
 export interface MatchPlayerStat {
   id: string;
@@ -50,6 +82,9 @@ export interface MatchPlayerStat {
   tarjetasAmarillas: number; // 0, 1, 2
   tarjetasRojas: number; // 0, 1
   notas?: string;
+  slotId?: string;
+  posicionTactico?: string;
+  minutoIngreso?: number;
 }
 
 export interface PlayerAggregatedStats {
@@ -58,6 +93,9 @@ export interface PlayerAggregatedStats {
   titularidades: number;
   suplenciasConMinutos: number;
   suplenciasSinMinutos: number;
+  noCitado: number;
+  suspendido: number;
+  lesionado: number;
   minutosTotales: number;
   golesTotales: number;
   asistenciasTotales: number;

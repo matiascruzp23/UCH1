@@ -65,6 +65,16 @@ export const PlayerListView: React.FC<PlayerListViewProps> = ({
     return dateStr;
   };
 
+  // Formato táctico de posiciones: Arqueros (1) -> Defensas (2) -> Mediocampistas (3) -> Delanteros (4)
+  const getPositionWeight = (pos: string): number => {
+    const lower = (pos || '').toLowerCase().trim();
+    if (lower.includes('arquero') || lower.includes('portero')) return 1;
+    if (lower.includes('defensa') || lower.includes('central') || lower.includes('lateral')) return 2;
+    if (lower.includes('medio') || lower.includes('volante') || lower.includes('pivote')) return 3;
+    if (lower.includes('delantero') || lower.includes('extremo') || lower.includes('punta') || lower.includes('ataque')) return 4;
+    return 5;
+  };
+
   // Badge colors by position category
   const getPositionBadgeColor = (pos: string) => {
     switch (pos) {
@@ -130,9 +140,17 @@ export const PlayerListView: React.FC<PlayerListViewProps> = ({
       case 'nombre':
         comparison = a.apellido.localeCompare(b.apellido);
         break;
-      case 'posicion':
-        comparison = (a.posicionDetallada || a.posicion).localeCompare(b.posicionDetallada || b.posicion);
+      case 'posicion': {
+        const weightA = getPositionWeight(a.posicion);
+        const weightB = getPositionWeight(b.posicion);
+        if (weightA !== weightB) {
+          comparison = weightA - weightB;
+        } else {
+          // Dentro de la misma línea táctica, ordenar por dorsal
+          comparison = a.dorsal - b.dorsal;
+        }
         break;
+      }
       case 'edad':
         comparison = new Date(a.fechaNacimiento).getTime() - new Date(b.fechaNacimiento).getTime();
         break;

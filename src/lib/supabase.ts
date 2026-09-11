@@ -125,7 +125,7 @@ create table if not exists public.match_player_stats (
   id text primary key,
   partido_id text not null references public.matches(id) on delete cascade,
   jugador_id text not null references public.players(id) on delete cascade,
-  condicion_jugador text not null check (condicion_jugador in ('Titular', 'Suplente', 'No convocado')),
+  condicion_jugador text not null check (condicion_jugador in ('Titular', 'Suplente que ingresa', 'Suplente que no ingresa', 'No citado', 'Suspendido', 'Lesionado', 'Suplente', 'No convocado')),
   minutos_jugados integer not null default 0 check (minutos_jugados >= 0),
   goles integer not null default 0 check (goles >= 0),
   asistencias integer not null default 0 check (asistencias >= 0),
@@ -135,6 +135,11 @@ create table if not exists public.match_player_stats (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   constraint unique_partido_jugador unique (partido_id, jugador_id)
 );
+
+-- Actualización segura si la tabla ya existía con el constraint anterior
+alter table public.match_player_stats drop constraint if exists match_player_stats_condicion_jugador_check;
+alter table public.match_player_stats add constraint match_player_stats_condicion_jugador_check 
+  check (condicion_jugador in ('Titular', 'Suplente que ingresa', 'Suplente que no ingresa', 'No citado', 'Suspendido', 'Lesionado', 'Suplente', 'No convocado'));
 
 -- 3. Índices para acelerar consultas y ordenamientos
 create index if not exists idx_matches_fecha on public.matches(fecha desc);
@@ -501,18 +506,39 @@ export async function fetchMatchesFromSupabase(): Promise<Match[] | null> {
     const { data, error } = await supabase.from('matches').select('*').order('fecha', { ascending: false });
     if (error || !data) return null;
 
-    return data.map((row: any) => ({
-      id: row.id,
-      rival: row.rival,
-      fecha: row.fecha,
-      torneo: row.torneo,
-      condicion: row.condicion,
-      golesFavor: row.goles_favor ?? 0,
-      golesContra: row.goles_contra ?? 0,
-      estadio: row.estadio || undefined,
-      jornada: row.jornada || undefined,
-      notas: row.notas || undefined
-    }));
+    return data.map((row: any) => {
+      let formacion = row.formacion || '4-3-3';
+      let titularesSlots = row.titulares_slots || undefined;
+      let rawNotas = row.notas || '';
+
+      // Check if tactical metadata is stored inside notas
+      const matchMeta = rawNotas.match(/\[TACTICA:(.+?)\]/);
+      if (matchMeta && matchMeta[1]) {
+        try {
+          const parsed = JSON.parse(matchMeta[1]);
+          if (parsed.formacion) formacion = parsed.formacion;
+          if (parsed.slots) titularesSlots = parsed.slots;
+        } catch (e) {
+          // Ignore parse errors
+        }
+      }
+      const cleanNotas = rawNotas.replace(/\[TACTICA:.+?\]/, '').trim() || undefined;
+
+      return {
+        id: row.id,
+        rival: row.rival,
+        fecha: row.fecha,
+        torneo: row.torneo,
+        condicion: row.condicion,
+        golesFavor: row.goles_favor ?? 0,
+        golesContra: row.goles_contra ?? 0,
+        estadio: row.estadio || undefined,
+        jornada: row.jornada || undefined,
+        notas: cleanNotas,
+        formacion,
+        titularesSlots
+      };
+    });
   } catch (err) {
     console.error('Error fetching matches from Supabase', err);
     return null;
@@ -524,6 +550,15 @@ export async function fetchMatchesFromSupabase(): Promise<Match[] | null> {
  */
 export async function saveMatchToSupabase(match: Match): Promise<{ success: boolean; error?: string }> {
   try {
+    let notasPayload = match.notas || '';
+    if (match.formacion || match.titularesSlots) {
+      const meta = JSON.stringify({
+        formacion: match.formacion || '4-3-3',
+        slots: match.titularesSlots || {}
+      });
+      notasPayload = `${notasPayload ? notasPayload + '\n' : ''}[TACTICA:${meta}]`;
+    }
+
     const payload = {
       id: match.id,
       rival: match.rival,
@@ -534,7 +569,7 @@ export async function saveMatchToSupabase(match: Match): Promise<{ success: bool
       goles_contra: match.golesContra,
       estadio: match.estadio || null,
       jornada: match.jornada || null,
-      notas: match.notas || null
+      notas: notasPayload || null
     };
 
     const { error } = await supabase.from('matches').upsert(payload);
@@ -609,7 +644,19 @@ export async function saveMatchStatsToSupabase(stats: MatchPlayerStat[]): Promis
       notas: s.notas || null
     }));
 
-    const { error } = await supabase.from('match_player_stats').upsert(payload);
+    let { error } = await supabase.from('match_player_stats').upsert(payload);
+    if (error && error.message && error.message.includes('condicion_jugador')) {
+      // Graceful fallback for legacy database check constraint
+      const fallbackPayload = payload.map((p) => {
+        let cond = p.condicion_jugador;
+        if (cond === 'Suplente que ingresa' || cond === 'Suplente que no ingresa') cond = 'Suplente';
+        if (cond === 'No citado' || cond === 'Suspendido' || cond === 'Lesionado') cond = 'No convocado';
+        return { ...p, condicion_jugador: cond };
+      });
+      const res = await supabase.from('match_player_stats').upsert(fallbackPayload);
+      error = res.error;
+    }
+
     if (error) {
       console.warn('Supabase match stats upsert warning:', error.message);
       return { success: false, error: error.message };

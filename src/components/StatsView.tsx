@@ -15,9 +15,14 @@ import {
   Award,
   Database,
   ArrowUpDown,
-  FileText
+  FileText,
+  LayoutGrid,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { Campograma } from './Campograma';
+import { TACTICAL_FORMATIONS, DEFAULT_FORMATION } from '../utils/tacticalFormations';
 
 interface StatsViewProps {
   players: Player[];
@@ -47,6 +52,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'minutos' | 'goles' | 'asistencias' | 'partidos' | 'dorsal'>('minutos');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [expandedPitchMatchId, setExpandedPitchMatchId] = useState<string | null>(null);
 
   // Format Date DD/MM/YYYY
   const formatDateDisplay = (dateStr: string) => {
@@ -58,17 +64,60 @@ export const StatsView: React.FC<StatsViewProps> = ({
     return dateStr;
   };
 
+  // Helper to derive slot assignment for a match
+  const getMatchSlots = (match: Match, mStats: MatchPlayerStat[]): Record<string, string> => {
+    if (match.titularesSlots && Object.keys(match.titularesSlots).length > 0) {
+      return match.titularesSlots;
+    }
+    const formKey = match.formacion || DEFAULT_FORMATION;
+    const formationDef = TACTICAL_FORMATIONS[formKey] || TACTICAL_FORMATIONS[DEFAULT_FORMATION];
+    const starters = mStats.filter((s) => s.condicionJugador === 'Titular');
+    const starterPlayers = starters.map((s) => players.find((p) => p.id === s.jugadorId)).filter(Boolean) as Player[];
+
+    const assigned: Record<string, string> = {};
+    const used = new Set<string>();
+
+    formationDef.slots.forEach((slot) => {
+      const matchCat = starterPlayers.find((p) => !used.has(p.id) && p.posicion === slot.categoria);
+      if (matchCat) {
+        assigned[slot.slotId] = matchCat.id;
+        used.add(matchCat.id);
+      }
+    });
+
+    formationDef.slots.forEach((slot) => {
+      if (!assigned[slot.slotId]) {
+        const remaining = starterPlayers.find((p) => !used.has(p.id));
+        if (remaining) {
+          assigned[slot.slotId] = remaining.id;
+          used.add(remaining.id);
+        }
+      }
+    });
+
+    return assigned;
+  };
+
   // Aggregated Player Statistics
   const aggregatedStats: PlayerAggregatedStats[] = useMemo(() => {
     return players.map((player) => {
       const pStats = matchStats.filter((s) => s.jugadorId === player.id);
       const titularidades = pStats.filter((s) => s.condicionJugador === 'Titular').length;
       const suplenciasConMinutos = pStats.filter(
-        (s) => s.condicionJugador === 'Suplente' && s.minutosJugados > 0
+        (s) =>
+          (s.condicionJugador === 'Suplente que ingresa' || s.condicionJugador === 'Suplente') &&
+          s.minutosJugados > 0
       ).length;
       const suplenciasSinMinutos = pStats.filter(
-        (s) => s.condicionJugador === 'Suplente' && s.minutosJugados === 0
+        (s) =>
+          s.condicionJugador === 'Suplente que no ingresa' ||
+          (s.condicionJugador === 'Suplente' && s.minutosJugados === 0)
       ).length;
+      const noCitado = pStats.filter(
+        (s) => s.condicionJugador === 'No citado' || s.condicionJugador === 'No convocado'
+      ).length;
+      const suspendido = pStats.filter((s) => s.condicionJugador === 'Suspendido').length;
+      const lesionado = pStats.filter((s) => s.condicionJugador === 'Lesionado').length;
       const partidosJugados = titularidades + suplenciasConMinutos;
       const minutosTotales = pStats.reduce((acc, s) => acc + (s.minutosJugados || 0), 0);
       const golesTotales = pStats.reduce((acc, s) => acc + (s.goles || 0), 0);
@@ -89,6 +138,9 @@ export const StatsView: React.FC<StatsViewProps> = ({
         titularidades,
         suplenciasConMinutos,
         suplenciasSinMinutos,
+        noCitado,
+        suspendido,
+        lesionado,
         minutosTotales,
         golesTotales,
         asistenciasTotales,
@@ -391,7 +443,21 @@ export const StatsView: React.FC<StatsViewProps> = ({
                 .map((match) => {
                   const mStats = matchStats.filter((s) => s.partidoId === match.id);
                   const titulares = mStats.filter((s) => s.condicionJugador === 'Titular');
-                  const suplentes = mStats.filter((s) => s.condicionJugador === 'Suplente' && s.minutosJugados > 0);
+                  const suplentesIngresan = mStats.filter(
+                    (s) =>
+                      (s.condicionJugador === 'Suplente que ingresa' || s.condicionJugador === 'Suplente') &&
+                      s.minutosJugados > 0
+                  );
+                  const suplentesNoIngresan = mStats.filter(
+                    (s) =>
+                      s.condicionJugador === 'Suplente que no ingresa' ||
+                      (s.condicionJugador === 'Suplente' && s.minutosJugados === 0)
+                  );
+                  const noCitados = mStats.filter(
+                    (s) => s.condicionJugador === 'No citado' || s.condicionJugador === 'No convocado'
+                  );
+                  const suspendidos = mStats.filter((s) => s.condicionJugador === 'Suspendido');
+                  const lesionados = mStats.filter((s) => s.condicionJugador === 'Lesionado');
                   const goleadores = mStats.filter((s) => s.goles > 0);
                   const amonestados = mStats.filter((s) => s.tarjetasAmarillas > 0);
                   const expulsados = mStats.filter((s) => s.tarjetasRojas > 0);
@@ -399,6 +465,8 @@ export const StatsView: React.FC<StatsViewProps> = ({
                   // Result indicator
                   const isWin = match.golesFavor > match.golesContra;
                   const isDraw = match.golesFavor === match.golesContra;
+                  const isPitchOpen = expandedPitchMatchId === match.id;
+                  const formationKey = match.formacion || DEFAULT_FORMATION;
 
                   return (
                     <div
@@ -452,10 +520,32 @@ export const StatsView: React.FC<StatsViewProps> = ({
                               📍 {match.estadio}
                             </span>
                           )}
+
+                          {/* Tactical Formation Badge */}
+                          <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-red-600/20 text-red-300 border border-red-500/40">
+                            {formationKey}
+                          </span>
                         </div>
 
-                        {/* Edit and Delete Buttons */}
-                        <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                        {/* Action buttons: Campograma, Edit, Delete */}
+                        <div className="flex items-center gap-1.5 self-end sm:self-auto flex-wrap">
+                          <button
+                            type="button"
+                            title="Ver u ocultar campograma táctico"
+                            onClick={() => setExpandedPitchMatchId(isPitchOpen ? null : match.id)}
+                            className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                              isPitchOpen
+                                ? 'bg-red-600 text-white border-red-400 shadow-sm'
+                                : isDark
+                                ? 'bg-[#020d24] text-blue-200 hover:text-white border-blue-900 hover:border-red-500'
+                                : 'bg-slate-100 text-slate-700 hover:text-[#002b7a] border-slate-300'
+                            }`}
+                          >
+                            <LayoutGrid className="w-3.5 h-3.5 text-red-400" />
+                            <span>{isPitchOpen ? 'Ocultar Campograma' : 'Ver Campograma'}</span>
+                            {isPitchOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                          </button>
+
                           <button
                             title="Editar partido y planilla"
                             onClick={() => onEditMatch(match)}
@@ -562,6 +652,31 @@ export const StatsView: React.FC<StatsViewProps> = ({
                         </div>
                       </div>
 
+                      {/* CAMPOGRAMA TACTICO EXPANDIBLE */}
+                      {isPitchOpen && (
+                        <div className="my-3 p-3.5 rounded-2xl border-2 border-red-600/50 bg-[#020f26]/90 shadow-inner">
+                          <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-700/60 flex-wrap gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-white font-athletic">
+                                Campograma Táctico: Formación {formationKey}
+                              </h4>
+                            </div>
+                            <span className="text-[11px] text-blue-200">
+                              11 Titulares alineados sobre el terreno de juego
+                            </span>
+                          </div>
+
+                          <Campograma
+                            formation={formationKey}
+                            slotsAssignment={getMatchSlots(match, mStats)}
+                            players={players}
+                            matchStats={mStats}
+                            isInteractive={false}
+                          />
+                        </div>
+                      )}
+
                       {/* Lineup & Participation Accordion / Badges */}
                       <div
                         className={`mt-2 pt-3 border-t text-xs space-y-2.5 ${
@@ -592,6 +707,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
                                   <span>{p.apellido}</span>
                                   <span className="text-[10px] text-slate-400">({t.minutosJugados}')</span>
                                   {t.goles > 0 && <span className="text-red-400">⚽{t.goles}</span>}
+                                  {t.asistencias > 0 && <span className="text-blue-400">🅰️{t.asistencias}</span>}
                                   {t.tarjetasAmarillas > 0 && <span>🟨</span>}
                                   {t.tarjetasRojas > 0 && <span>🟥</span>}
                                 </button>
@@ -600,14 +716,14 @@ export const StatsView: React.FC<StatsViewProps> = ({
                           </div>
                         </div>
 
-                        {/* Suplentes con minutos */}
-                        {suplentes.length > 0 && (
+                        {/* Suplentes que ingresaron */}
+                        {suplentesIngresan.length > 0 && (
                           <div>
-                            <span className={`text-[10px] uppercase font-bold tracking-wider block mb-1 text-amber-400`}>
-                              Ingresaron desde el banco ({suplentes.length}):
+                            <span className={`text-[10px] uppercase font-bold tracking-wider block mb-1 text-blue-400`}>
+                              Suplentes que ingresaron ({suplentesIngresan.length}):
                             </span>
                             <div className="flex flex-wrap gap-1.5">
-                              {suplentes.map((s) => {
+                              {suplentesIngresan.map((s) => {
                                 const p = players.find((x) => x.id === s.jugadorId);
                                 if (!p) return null;
                                 return (
@@ -617,18 +733,123 @@ export const StatsView: React.FC<StatsViewProps> = ({
                                     title={`Ver ficha de ${p.nombre} ${p.apellido}`}
                                     className={`px-2 py-1 rounded-lg border text-[11px] font-medium flex items-center gap-1 cursor-pointer transition-colors ${
                                       isDark
-                                        ? 'bg-[#020d24] text-amber-200 hover:text-white border-amber-900/60 hover:border-amber-400'
-                                        : 'bg-amber-50 text-slate-800 hover:bg-amber-100 border-amber-300'
+                                        ? 'bg-[#020d24] text-blue-200 hover:text-white border-blue-900 hover:border-blue-400'
+                                        : 'bg-blue-50 text-slate-800 hover:bg-blue-100 border-blue-300'
                                     }`}
                                   >
                                     <span className="font-athletic font-bold text-red-500">#{p.dorsal}</span>
                                     <span>{p.apellido}</span>
                                     <span className="text-[10px] text-slate-400">({s.minutosJugados}')</span>
                                     {s.goles > 0 && <span className="text-red-400">⚽{s.goles}</span>}
+                                    {s.asistencias > 0 && <span className="text-blue-400">🅰️{s.asistencias}</span>}
+                                    {s.tarjetasAmarillas > 0 && <span>🟨</span>}
+                                    {s.tarjetasRojas > 0 && <span>🟥</span>}
                                   </button>
                                 );
                               })}
                             </div>
+                          </div>
+                        )}
+
+                        {/* Suplentes que no ingresaron (Banca) */}
+                        {suplentesNoIngresan.length > 0 && (
+                          <div>
+                            <span className={`text-[10px] uppercase font-bold tracking-wider block mb-1 text-slate-400`}>
+                              En banca sin minutos ({suplentesNoIngresan.length}):
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {suplentesNoIngresan.map((s) => {
+                                const p = players.find((x) => x.id === s.jugadorId);
+                                if (!p) return null;
+                                return (
+                                  <button
+                                    key={s.id}
+                                    onClick={() => onOpenPlayerHistory(p)}
+                                    title={`Ver ficha de ${p.nombre} ${p.apellido}`}
+                                    className={`px-2 py-0.5 rounded-lg border text-[10px] flex items-center gap-1 cursor-pointer opacity-80 hover:opacity-100 transition-opacity ${
+                                      isDark
+                                        ? 'bg-[#020d24]/60 text-slate-400 hover:text-white border-slate-800'
+                                        : 'bg-slate-100 text-slate-600 border-slate-200'
+                                    }`}
+                                  >
+                                    <span className="font-mono text-slate-400">#{p.dorsal}</span>
+                                    <span>{p.apellido}</span>
+                                    <span className="text-[9px] text-slate-500">(0')</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Bajas / No convocados / Suspendidos / Lesionados */}
+                        {(noCitados.length > 0 || suspendidos.length > 0 || lesionados.length > 0) && (
+                          <div className="flex flex-wrap gap-4 pt-1 border-t border-slate-800/40">
+                            {suspendidos.length > 0 && (
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-amber-400 block mb-0.5">
+                                  🟡 Suspendidos ({suspendidos.length}):
+                                </span>
+                                <div className="flex flex-wrap gap-1">
+                                  {suspendidos.map((s) => {
+                                    const p = players.find((x) => x.id === s.jugadorId);
+                                    if (!p) return null;
+                                    return (
+                                      <span
+                                        key={s.id}
+                                        className="px-1.5 py-0.5 rounded text-[10px] bg-amber-900/30 text-amber-300 border border-amber-600/40"
+                                      >
+                                        #{p.dorsal} {p.apellido}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            {lesionados.length > 0 && (
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-rose-400 block mb-0.5">
+                                  🔴 Lesionados ({lesionados.length}):
+                                </span>
+                                <div className="flex flex-wrap gap-1">
+                                  {lesionados.map((s) => {
+                                    const p = players.find((x) => x.id === s.jugadorId);
+                                    if (!p) return null;
+                                    return (
+                                      <span
+                                        key={s.id}
+                                        className="px-1.5 py-0.5 rounded text-[10px] bg-rose-900/30 text-rose-300 border border-rose-600/40"
+                                      >
+                                        #{p.dorsal} {p.apellido}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            {noCitados.length > 0 && (
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-slate-500 block mb-0.5">
+                                  🔘 No citados ({noCitados.length}):
+                                </span>
+                                <div className="flex flex-wrap gap-1">
+                                  {noCitados.map((s) => {
+                                    const p = players.find((x) => x.id === s.jugadorId);
+                                    if (!p) return null;
+                                    return (
+                                      <span
+                                        key={s.id}
+                                        className="px-1.5 py-0.5 rounded text-[10px] bg-zinc-900/40 text-zinc-400 border border-zinc-700/40"
+                                      >
+                                        #{p.dorsal} {p.apellido}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -769,8 +990,16 @@ export const StatsView: React.FC<StatsViewProps> = ({
                       </td>
 
                       {/* TIT / SUP */}
-                      <td className="p-3 text-center text-[11px] text-slate-400">
-                        {item.titularidades} / {item.suplenciasConMinutos}
+                      <td
+                        className="p-3 text-center text-[11px]"
+                        title={`Titular: ${item.titularidades} | Entra de suplente: ${item.suplenciasConMinutos} | En banca sin min: ${item.suplenciasSinMinutos} | No citado: ${item.noCitado} | Suspendido: ${item.suspendido} | Lesionado: ${item.lesionado}`}
+                      >
+                        <span className="text-emerald-400 font-bold">{item.titularidades}T</span>
+                        <span className="text-slate-500 mx-0.5">/</span>
+                        <span className="text-blue-400 font-semibold">{item.suplenciasConMinutos}S</span>
+                        {item.suplenciasSinMinutos > 0 && (
+                          <span className="text-[10px] text-slate-400 ml-1 font-mono">({item.suplenciasSinMinutos}b)</span>
+                        )}
                       </td>
 
                       {/* MIN */}
