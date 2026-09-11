@@ -8,7 +8,6 @@ import { EvaluationModal } from './components/EvaluationModal';
 import { PlayerHistoryModal } from './components/PlayerHistoryModal';
 import { PlayerModal } from './components/PlayerModal';
 import { DeletePlayerConfirmModal } from './components/DeletePlayerConfirmModal';
-import { PromptModal } from './components/PromptModal';
 import { SupabaseSyncModal } from './components/SupabaseSyncModal';
 import { StatsView } from './components/StatsView';
 import { MatchModal } from './components/MatchModal';
@@ -160,7 +159,6 @@ export default function App() {
   const [selectedPlayerToDelete, setSelectedPlayerToDelete] = useState<Player | null>(null);
 
   // Modals state for Info & Supabase
-  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
 
   // Supabase Status State
@@ -459,7 +457,6 @@ export default function App() {
         playerCount={players.length}
         evaluationsCount={totalEvaluationsCount}
         matchCount={matches.length}
-        onOpenPromptModal={() => setIsPromptModalOpen(true)}
         onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
         supabaseStatus={supabaseStatus}
       />
@@ -687,13 +684,6 @@ export default function App() {
               <Database className="w-3 h-3" />
               <span>Base de Datos Supabase</span>
             </button>
-            <span>•</span>
-            <button
-              onClick={() => setIsPromptModalOpen(true)}
-              className="text-red-600 hover:text-red-500 font-semibold underline cursor-pointer"
-            >
-              Ver Prompt AI Studio
-            </button>
           </div>
         </div>
       </footer>
@@ -772,12 +762,6 @@ export default function App() {
         players={players}
         evaluations={evaluations}
         onPullFromSupabase={handlePullFromSupabase}
-      />
-
-      {/* Recommended Prompt Modal */}
-      <PromptModal
-        isOpen={isPromptModalOpen}
-        onClose={() => setIsPromptModalOpen(false)}
       />
     </div>
   );

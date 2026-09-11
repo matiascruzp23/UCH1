@@ -1,6 +1,6 @@
 import React from 'react';
 import { TabType } from '../types';
-import { Users, BarChart3, Shield, Copy, Check, Database, CheckCircle2, AlertTriangle, Sun, Moon, Trophy } from 'lucide-react';
+import { Users, BarChart3, Shield, Check, Database, CheckCircle2, AlertTriangle, Sun, Moon, Trophy } from 'lucide-react';
 import { SupabaseStatus } from '../lib/supabase';
 import { useTheme } from '../context/ThemeContext';
 
@@ -10,7 +10,7 @@ interface HeaderProps {
   playerCount: number;
   evaluationsCount: number;
   matchCount?: number;
-  onOpenPromptModal: () => void;
+  onOpenPromptModal?: () => void;
   onOpenSupabaseModal: () => void;
   supabaseStatus: SupabaseStatus | null;
 }
@@ -21,7 +21,6 @@ export const Header: React.FC<HeaderProps> = ({
   playerCount,
   evaluationsCount,
   matchCount = 0,
-  onOpenPromptModal,
   onOpenSupabaseModal,
   supabaseStatus
 }) => {
@@ -34,29 +33,23 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex flex-col sm:flex-row items-center justify-between py-4 sm:py-6 gap-4">
           {/* Logo & Identity */}
           <div className="flex items-center gap-4">
-            {/* Universidad de Chile Emblem Badge */}
+            {/* Escudo Real Club Universidad de Chile */}
             <div 
               id="uch-club-crest" 
-              className={`w-16 h-16 sm:w-20 sm:h-20 ${isDark ? 'bg-[#002B7A]' : 'bg-[#001f5c]'} border-2 border-red-600 rounded-xl shadow-lg flex items-center justify-center relative overflow-hidden flex-shrink-0`}
+              className="w-16 h-20 sm:w-20 sm:h-24 flex items-center justify-center relative flex-shrink-0 transition-transform duration-200 hover:scale-105 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
             >
-              {/* Inner red ring and iconic 'U' */}
-              <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg ${isDark ? 'bg-[#001f5c]' : 'bg-[#001744]'} border border-red-500/60 flex flex-col items-center justify-center`}>
-                <span className="font-athletic font-extrabold text-3xl sm:text-4xl text-red-600 tracking-tighter leading-none select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                  U
-                </span>
-                <span className="text-[9px] font-bold text-slate-300 tracking-wider uppercase mt-0.5">
-                  1927
-                </span>
-              </div>
+              <img
+                src="/uchile_escudo.png"
+                alt="Escudo Oficial Club Universidad de Chile"
+                className="w-full h-full object-contain filter drop-shadow-md"
+                referrerPolicy="no-referrer"
+              />
             </div>
 
             <div>
               <div className="flex items-center gap-2">
-                <span className="inline-block px-2 py-0.5 text-xs font-semibold uppercase tracking-wider bg-red-600 text-white rounded border border-red-500">
+                <span className="inline-block px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider bg-red-600 text-white rounded border border-red-500 shadow-xs">
                   Club Universidad de Chile
-                </span>
-                <span className="hidden sm:inline-block text-xs font-medium text-blue-200/90">
-                  El Romántico Viajero
                 </span>
               </div>
               <h1 id="app-main-title" className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white font-athletic uppercase">
@@ -68,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Quick Actions, Theme Toggle, Supabase Connection & Prompt button */}
+          {/* Quick Actions: Theme Toggle & Supabase Connection */}
           <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end flex-wrap">
             {/* BOTÓN MODO CLARO / OSCURO */}
             <button
@@ -114,18 +107,6 @@ export const Header: React.FC<HeaderProps> = ({
               ) : (
                 <span className="w-2 h-2 rounded-full bg-amber-400" />
               )}
-            </button>
-
-            <button
-              id="btn-view-prompt"
-              onClick={onOpenPromptModal}
-              className={`px-3 py-2 ${
-                isDark ? 'bg-[#082252] hover:bg-[#0c3175]' : 'bg-[#001f5c] hover:bg-[#001744]'
-              } text-blue-100 hover:text-white border-2 border-red-500 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer`}
-              title="Ver el prompt optimizado para AI Studio"
-            >
-              <Copy className="w-3.5 h-3.5 text-red-400" />
-              <span>Prompt AI Studio</span>
             </button>
           </div>
         </div>

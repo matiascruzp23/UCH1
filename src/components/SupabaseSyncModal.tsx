@@ -17,6 +17,7 @@ import {
   SUPABASE_URL,
   SUPABASE_SQL_SCRIPT,
   SUPABASE_STATS_SQL_SCRIPT,
+  SUPABASE_PLAYERS_UPDATE_SQL,
   SupabaseStatus,
   checkSupabaseStatus,
   seedInitialDataToSupabase
@@ -45,14 +46,19 @@ export const SupabaseSyncModal: React.FC<SupabaseSyncModalProps> = ({
 }) => {
   const { isDark } = useTheme();
   const [copied, setCopied] = useState(false);
-  const [sqlTab, setSqlTab] = useState<'stats' | 'full'>('stats');
+  const [sqlTab, setSqlTab] = useState<'players' | 'stats' | 'full'>('players');
   const [isSeeding, setIsSeeding] = useState(false);
   const [isPulling, setIsPulling] = useState(false);
   const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   if (!isOpen) return null;
 
-  const currentSqlScript = sqlTab === 'stats' ? SUPABASE_STATS_SQL_SCRIPT : SUPABASE_SQL_SCRIPT;
+  const currentSqlScript =
+    sqlTab === 'players'
+      ? SUPABASE_PLAYERS_UPDATE_SQL
+      : sqlTab === 'stats'
+      ? SUPABASE_STATS_SQL_SCRIPT
+      : SUPABASE_SQL_SCRIPT;
 
   const handleCopySQL = () => {
     navigator.clipboard.writeText(currentSqlScript);
@@ -247,7 +253,21 @@ export const SupabaseSyncModal: React.FC<SupabaseSyncModalProps> = ({
             </p>
 
             {/* SQL Script Tabs */}
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setSqlTab('players')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors ${
+                  sqlTab === 'players'
+                    ? 'bg-red-600 text-white border-red-400 shadow-xs'
+                    : isDark
+                      ? 'bg-[#020d24] text-blue-300 border-blue-900'
+                      : 'bg-white text-slate-700 border-slate-300'
+                }`}
+              >
+                ⭐ Actualizar Plantel (23 Jugadores)
+              </button>
+
               <button
                 type="button"
                 onClick={() => setSqlTab('stats')}
@@ -259,7 +279,7 @@ export const SupabaseSyncModal: React.FC<SupabaseSyncModalProps> = ({
                       : 'bg-white text-slate-700 border-slate-300'
                 }`}
               >
-                ⭐ Solo Tablas de Estadísticas & Partidos (Nuevo)
+                Tablas Estadísticas & Partidos
               </button>
 
               <button
@@ -273,7 +293,7 @@ export const SupabaseSyncModal: React.FC<SupabaseSyncModalProps> = ({
                       : 'bg-white text-slate-700 border-slate-300'
                 }`}
               >
-                Script Completo (4 Tablas)
+                Script Completo
               </button>
             </div>
 
@@ -307,7 +327,7 @@ export const SupabaseSyncModal: React.FC<SupabaseSyncModalProps> = ({
               </h3>
             </div>
             <p className={`text-xs ${isDark ? 'text-blue-200/90' : 'text-slate-600'}`}>
-              Una vez creadas las tablas, puedes enviar todo el plantel actual de la Universidad de Chile (10 jugadores) y su historial de evaluaciones directamente a la base de datos Supabase:
+              Una vez creadas las tablas, puedes enviar todo el plantel actual de la Universidad de Chile (23 jugadores) y su historial de evaluaciones directamente a la base de datos Supabase:
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">

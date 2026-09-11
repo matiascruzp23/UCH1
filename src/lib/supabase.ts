@@ -19,6 +19,85 @@ export interface SupabaseStatus {
   lastChecked: Date;
 }
 
+// SQL Script specifically to update the 23 players and add new columns
+export const SUPABASE_PLAYERS_UPDATE_SQL = `-- ==============================================================================
+-- SCRIPT SQL: ACTUALIZACIÓN DE PLANTEL UNIVERSIDAD DE CHILE (23 JUGADORES)
+-- Agrega columnas 'posicion_detallada' y 'altura' y actualiza la información completa
+-- Ejecutar en: https://supabase.com/dashboard/project/ggilenmealydjwbxwdbb/sql
+-- ==============================================================================
+
+-- 1. Crear tabla si no existe
+create table if not exists public.players (
+  id text primary key,
+  nombre text not null,
+  apellido text not null,
+  dorsal integer not null,
+  posicion text not null,
+  posicion_detallada text,
+  fecha_nacimiento text not null,
+  nacionalidad text,
+  pie_habil text,
+  altura text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 2. Asegurar que las nuevas columnas existan si la tabla ya estaba creada
+alter table public.players add column if not exists posicion_detallada text;
+alter table public.players add column if not exists altura text;
+
+-- 3. Habilitar RLS y política de acceso público
+alter table public.players enable row level security;
+drop policy if exists "Acceso total a players" on public.players;
+create policy "Acceso total a players" on public.players
+  for all using (true) with check (true);
+
+-- 4. Insertar o Actualizar los 23 Jugadores Oficiales
+insert into public.players (
+  id, nombre, apellido, dorsal, posicion, posicion_detallada,
+  fecha_nacimiento, nacionalidad, pie_habil, altura
+) values
+  -- Arqueros
+  ('uch-25', 'Gabriel', 'Castellón', 25, 'Arquero', 'Portero', '1993-09-08', 'Chileno', 'Derecho', '1,88m'),
+  ('uch-1', 'Cristopher', 'Toselli', 1, 'Arquero', 'Portero', '1988-06-15', 'Chileno / Italiano', 'Derecho', '1,83m'),
+
+  -- Defensas
+  ('uch-3', 'Igor', 'Lichnovsky', 3, 'Defensa', 'Defensa central', '1994-03-07', 'Chileno / Austríaco', 'Derecho', '1,87m'),
+  ('uch-5', 'Nicolás', 'Ramírez', 5, 'Defensa', 'Defensa central', '1997-05-01', 'Chileno', 'Derecho', '1,82m'),
+  ('uch-31', 'Bianneider', 'Tamayo', 31, 'Defensa', 'Defensa central', '2005-01-13', 'Venezolano', 'Izquierdo', '1,84m'),
+  ('uch-22', 'Matías', 'Zaldivia', 22, 'Defensa', 'Defensa central', '1991-01-22', 'Chileno / Argentino', 'Derecho', '1,81m'),
+  ('uch-14', 'Marcelo', 'Morales', 14, 'Defensa', 'Lateral izquierdo', '2003-06-06', 'Chileno', 'Izquierdo', '1,76m'),
+  ('uch-4', 'Diego', 'Vargas', 4, 'Defensa', 'Lateral izquierdo', '2006-08-31', 'Chileno', 'Izquierdo', '1,74m'),
+  ('uch-17', 'Fabián', 'Hormazábal', 17, 'Defensa', 'Lateral derecho', '1996-04-26', 'Chileno', 'Derecho', '1,76m'),
+  ('uch-6', 'Nicolás', 'Fernández', 6, 'Defensa', 'Lateral derecho', '1999-08-03', 'Chileno', 'Derecho', '1,73m'),
+
+  -- Mediocampistas
+  ('uch-29', 'Lucas', 'Barrera', 29, 'Mediocampista', 'Pivote', '2006-04-21', 'Argentino', 'Derecho', '1,82m'),
+  ('uch-21', 'Marcelo', 'Díaz', 21, 'Mediocampista', 'Pivote', '1986-12-30', 'Chileno', 'Derecho', '1,67m'),
+  ('uch-8', 'Israel', 'Poblete', 8, 'Mediocampista', 'Mediocentro', '1995-06-22', 'Chileno', 'Derecho', '1,72m'),
+  ('uch-15', 'Tobías', 'Reinhart', 15, 'Mediocampista', 'Mediocentro', '2000-05-21', 'Argentino / Italiano', 'Derecho', '1,76m'),
+  ('uch-20', 'Charles', 'Aránguiz', 20, 'Mediocampista', 'Mediocentro', '1989-04-17', 'Chileno', 'Derecho', '1,72m'),
+  ('uch-19', 'Javier', 'Altamirano', 19, 'Mediocampista', 'Mediocentro ofensivo', '1999-08-21', 'Chileno', 'Izquierdo', '1,73m'),
+  ('uch-28', 'Agustín', 'Arce', 28, 'Mediocampista', 'Mediocentro ofensivo', '2005-01-24', 'Chileno', 'Derecho', '1,80m'),
+
+  -- Delanteros
+  ('uch-23', 'Ignacio', 'Vásquez', 23, 'Delantero', 'Extremo izquierdo', '2006-05-22', 'Chileno', 'Derecho', '1,71m'),
+  ('uch-7', 'Maximiliano', 'Guerrero', 7, 'Delantero', 'Extremo derecho', '2000-01-15', 'Chileno', 'Derecho', '1,72m'),
+  ('uch-32', 'Gonzalo', 'Reyna', 32, 'Delantero', 'Extremo derecho', '2006-07-23', 'Argentino', 'Izquierdo', '1,71m'),
+  ('uch-18', 'Juan Martín', 'Lucero', 18, 'Delantero', 'Delantero centro', '1991-10-10', 'Argentino', 'Derecho', '1,83m'),
+  ('uch-9', 'Octavio', 'Rivero', 9, 'Delantero', 'Delantero centro', '1992-01-24', 'Uruguayo / Español', 'Derecho', '1,84m'),
+  ('uch-11', 'Eduardo', 'Vargas', 11, 'Delantero', 'Delantero centro', '1989-11-20', 'Chileno', 'Derecho', '1,73m')
+on conflict (id) do update set
+  nombre = excluded.nombre,
+  apellido = excluded.apellido,
+  dorsal = excluded.dorsal,
+  posicion = excluded.posicion,
+  posicion_detallada = excluded.posicion_detallada,
+  fecha_nacimiento = excluded.fecha_nacimiento,
+  nacionalidad = excluded.nacionalidad,
+  pie_habil = excluded.pie_habil,
+  altura = excluded.altura;
+`;
+
 // SQL Script ONLY for the Statistics & Matches tables
 export const SUPABASE_STATS_SQL_SCRIPT = `-- =======================================================
 -- SCRIPT SQL: REGISTRO ESTADÍSTICO Y PARTIDOS (SUPABASE)
@@ -378,6 +457,8 @@ export async function seedInitialDataToSupabase(
       apellido: p.apellido,
       dorsal: p.dorsal,
       posicion: p.posicion,
+      posicion_detallada: p.posicionDetallada || p.posicion,
+      altura: p.altura || null,
       fecha_nacimiento: p.fechaNacimiento,
       nacionalidad: p.nacionalidad || null,
       pie_habil: p.pieHabil || null

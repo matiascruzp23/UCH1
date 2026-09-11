@@ -489,13 +489,21 @@ export const StatsView: React.FC<StatsViewProps> = ({
 
                       {/* Scoreboard Row */}
                       <div className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          {/* Club Name */}
-                          <div className="text-right min-w-[120px]">
-                            <span className="font-athletic font-extrabold text-lg sm:text-xl uppercase block text-white">
-                              U. de Chile
-                            </span>
-                            <span className="text-[10px] text-blue-300">El Romántico Viajero</span>
+                        <div className="flex items-center gap-3">
+                          {/* Club Name & Escudo */}
+                          <div className="flex items-center gap-2.5">
+                            <img
+                              src="/uchile_escudo.png"
+                              alt="U. de Chile"
+                              className="w-7 h-9 object-contain drop-shadow-sm flex-shrink-0"
+                              referrerPolicy="no-referrer"
+                            />
+                            <div className="text-left min-w-[100px]">
+                              <span className="font-athletic font-extrabold text-lg sm:text-xl uppercase block text-white">
+                                U. de Chile
+                              </span>
+                              <span className="text-[10px] text-blue-300 font-medium">Club Universidad de Chile</span>
+                            </div>
                           </div>
 
                           {/* Score Badge */}
