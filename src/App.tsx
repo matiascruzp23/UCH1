@@ -35,48 +35,60 @@ export default function App() {
   const { isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<TabType>('plantilla');
 
-  // Players state with localStorage persistence
+  // Players state with version check and localStorage persistence
+  const CURRENT_DATA_VERSION = 'uch_plantel_oficial_23_v3';
+
   const [players, setPlayers] = useState<Player[]>(() => {
-    const saved = localStorage.getItem('uch_players');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+    const savedVersion = localStorage.getItem('uch_data_version');
+    if (savedVersion === CURRENT_DATA_VERSION) {
+      const saved = localStorage.getItem('uch_players');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        } catch (e) {
+          console.error('Error loading players from localStorage', e);
         }
-      } catch (e) {
-        console.error('Error loading players from localStorage', e);
       }
     }
+    // Update version to load current 23-player roster
+    try {
+      localStorage.setItem('uch_data_version', CURRENT_DATA_VERSION);
+    } catch {}
     return INITIAL_PLAYERS;
   });
 
   // Evaluations history state: map of player ID to an array of PlayerEvaluation
   const [evaluations, setEvaluations] = useState<Record<string, PlayerEvaluation[]>>(() => {
-    const saved = localStorage.getItem('uch_evaluations_history') || localStorage.getItem('uch_evaluations');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        const map: Record<string, PlayerEvaluation[]> = {};
-        let validRecordsCount = 0;
+    const savedVersion = localStorage.getItem('uch_data_version');
+    if (savedVersion === CURRENT_DATA_VERSION) {
+      const saved = localStorage.getItem('uch_evaluations_history') || localStorage.getItem('uch_evaluations');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          const map: Record<string, PlayerEvaluation[]> = {};
+          let validRecordsCount = 0;
 
-        for (const key of Object.keys(parsed)) {
-          const item = parsed[key];
-          if (Array.isArray(item)) {
-            map[key] = item;
-            validRecordsCount += item.length;
-          } else if (item && typeof item === 'object') {
-            // Migrate single evaluation to array
-            map[key] = [item];
-            validRecordsCount += 1;
+          for (const key of Object.keys(parsed)) {
+            const item = parsed[key];
+            if (Array.isArray(item)) {
+              map[key] = item;
+              validRecordsCount += item.length;
+            } else if (item && typeof item === 'object') {
+              // Migrate single evaluation to array
+              map[key] = [item];
+              validRecordsCount += 1;
+            }
           }
-        }
 
-        if (validRecordsCount > 0) {
-          return map;
+          if (validRecordsCount > 0) {
+            return map;
+          }
+        } catch (e) {
+          console.error('Error loading evaluations history', e);
         }
-      } catch (e) {
-        console.error('Error loading evaluations history', e);
       }
     }
 
@@ -93,30 +105,36 @@ export default function App() {
 
   // Matches and Lineup Statistics State with localStorage fallback
   const [matches, setMatches] = useState<Match[]>(() => {
-    const saved = localStorage.getItem('uch_matches');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+    const savedVersion = localStorage.getItem('uch_data_version');
+    if (savedVersion === CURRENT_DATA_VERSION) {
+      const saved = localStorage.getItem('uch_matches');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        } catch (e) {
+          console.error('Error loading matches from localStorage', e);
         }
-      } catch (e) {
-        console.error('Error loading matches from localStorage', e);
       }
     }
     return INITIAL_MATCHES;
   });
 
   const [matchStats, setMatchStats] = useState<MatchPlayerStat[]>(() => {
-    const saved = localStorage.getItem('uch_match_stats');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+    const savedVersion = localStorage.getItem('uch_data_version');
+    if (savedVersion === CURRENT_DATA_VERSION) {
+      const saved = localStorage.getItem('uch_match_stats');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        } catch (e) {
+          console.error('Error loading match stats from localStorage', e);
         }
-      } catch (e) {
-        console.error('Error loading match stats from localStorage', e);
       }
     }
     return INITIAL_MATCH_STATS;
@@ -415,9 +433,14 @@ export default function App() {
 
   // Filter players for Plantilla tab
   const filteredPlayers = players.filter((player) => {
+    const query = searchQuery.toLowerCase().trim();
     const matchesSearch =
-      `${player.nombre} ${player.apellido}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      player.dorsal.toString().includes(searchQuery);
+      !query ||
+      `${player.nombre} ${player.apellido}`.toLowerCase().includes(query) ||
+      player.dorsal.toString().includes(query) ||
+      (player.posicionDetallada && player.posicionDetallada.toLowerCase().includes(query)) ||
+      (player.pieHabil && player.pieHabil.toLowerCase().includes(query)) ||
+      (player.nacionalidad && player.nacionalidad.toLowerCase().includes(query));
 
     const matchesPosition =
       selectedPosition === 'TODOS' || player.posicion.toUpperCase() === selectedPosition;

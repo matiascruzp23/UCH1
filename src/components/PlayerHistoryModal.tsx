@@ -86,6 +86,15 @@ export const PlayerHistoryModal: React.FC<PlayerHistoryModalProps> = ({
     return dateStr;
   };
 
+  // Age calculation
+  const birthDate = new Date(player.fechaNacimiento);
+  const today = new Date();
+  let playerAge = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    playerAge--;
+  }
+
   // Prepare chart dataset
   const chartData = chronologicalEvals.map((ev) => {
     const parts = ev.fechaEvaluacion.split('-');
@@ -244,6 +253,50 @@ export const PlayerHistoryModal: React.FC<PlayerHistoryModalProps> = ({
               <X className="w-5 h-5" />
             </button>
           </div>
+        </div>
+
+        {/* Ficha Bio: Edad, Pie, Altura, Posición Detallada y Nacionalidad */}
+        <div
+          className={`px-5 sm:px-6 py-2.5 border-b text-xs flex flex-wrap items-center gap-x-5 gap-y-1.5 ${
+            isDark ? 'bg-[#00173d] border-blue-900/80 text-blue-200' : 'bg-blue-50/70 border-slate-200 text-slate-700'
+          }`}
+        >
+          <div className="flex items-center gap-1.5">
+            <span className="opacity-75 font-medium uppercase text-[10px] tracking-wider">Posición:</span>
+            <span className="font-bold text-red-600 bg-red-600/10 px-2 py-0.5 rounded border border-red-500/20">
+              {player.posicionDetallada || player.posicion}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="opacity-75 font-medium uppercase text-[10px] tracking-wider">Edad:</span>
+            <span className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              {playerAge} años <span className="opacity-65 font-mono">({formatDateDisplay(player.fechaNacimiento)})</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="opacity-75 font-medium uppercase text-[10px] tracking-wider">Altura:</span>
+            <span className={`font-semibold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              {player.altura || 'N/D'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="opacity-75 font-medium uppercase text-[10px] tracking-wider">Pie Hábil:</span>
+            <span className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              {player.pieHabil || 'N/D'}
+            </span>
+          </div>
+
+          {player.nacionalidad && (
+            <div className="flex items-center gap-1.5">
+              <span className="opacity-75 font-medium uppercase text-[10px] tracking-wider">Nacionalidad:</span>
+              <span className={`font-semibold ${isDark ? 'text-blue-100' : 'text-slate-800'}`}>
+                {player.nacionalidad}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Navigation Tabs inside the Player Profile */}

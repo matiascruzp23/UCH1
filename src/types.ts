@@ -5,7 +5,9 @@ export interface Player {
   dorsal: number;
   fechaNacimiento: string; // YYYY-MM-DD format
   posicion: 'Arquero' | 'Defensa' | 'Mediocampista' | 'Delantero';
+  posicionDetallada?: string; // e.g., 'Portero', 'Defensa central', 'Lateral derecho', 'Pivote', 'Delantero centro', etc.
   pieHabil?: 'Derecho' | 'Izquierdo' | 'Ambidiestro';
+  altura?: string; // e.g., '1,88m'
   nacionalidad?: string;
   fotoUrl?: string;
 }

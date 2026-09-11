@@ -21,6 +21,8 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
   const [apellido, setApellido] = useState('');
   const [dorsal, setDorsal] = useState<number>(1);
   const [posicion, setPosicion] = useState<Player['posicion']>('Mediocampista');
+  const [posicionDetallada, setPosicionDetallada] = useState('');
+  const [altura, setAltura] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState('2000-01-01');
   const [pieHabil, setPieHabil] = useState<Player['pieHabil']>('Derecho');
   const [nacionalidad, setNacionalidad] = useState('Chilena');
@@ -32,6 +34,8 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
       setApellido(playerToEdit.apellido);
       setDorsal(playerToEdit.dorsal);
       setPosicion(playerToEdit.posicion);
+      setPosicionDetallada(playerToEdit.posicionDetallada || '');
+      setAltura(playerToEdit.altura || '');
       setFechaNacimiento(playerToEdit.fechaNacimiento);
       setPieHabil(playerToEdit.pieHabil || 'Derecho');
       setNacionalidad(playerToEdit.nacionalidad || 'Chilena');
@@ -40,6 +44,8 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
       setApellido('');
       setDorsal(10);
       setPosicion('Mediocampista');
+      setPosicionDetallada('');
+      setAltura('');
       setFechaNacimiento('2001-01-01');
       setPieHabil('Derecho');
       setNacionalidad('Chilena');
@@ -74,6 +80,8 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
       apellido: apellido.trim(),
       dorsal: Number(dorsal),
       posicion,
+      posicionDetallada: posicionDetallada.trim() || undefined,
+      altura: altura.trim() || undefined,
       fechaNacimiento,
       pieHabil,
       nacionalidad: nacionalidad.trim() || 'Chilena'
@@ -229,6 +237,49 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
                   <option value="Delantero">Delantero</option>
                 </select>
               </div>
+            </div>
+          </div>
+
+          {/* Posición Detallada y Altura */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
+                isDark ? 'text-blue-200' : 'text-slate-700'
+              }`}>
+                Posición Detallada
+              </label>
+              <input
+                id="input-player-posicion-detallada"
+                type="text"
+                placeholder="Ej: Delantero centro, Lateral derecho"
+                value={posicionDetallada}
+                onChange={(e) => setPosicionDetallada(e.target.value)}
+                className={`w-full ${
+                  isDark
+                    ? 'bg-[#061d47] border-blue-800 text-white'
+                    : 'bg-slate-50 border-slate-300 text-slate-900'
+                } border focus:border-red-500 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors`}
+              />
+            </div>
+
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${
+                isDark ? 'text-blue-200' : 'text-slate-700'
+              }`}>
+                Altura
+              </label>
+              <input
+                id="input-player-altura"
+                type="text"
+                placeholder="Ej: 1,83m"
+                value={altura}
+                onChange={(e) => setAltura(e.target.value)}
+                className={`w-full ${
+                  isDark
+                    ? 'bg-[#061d47] border-blue-800 text-white'
+                    : 'bg-slate-50 border-slate-300 text-slate-900'
+                } border focus:border-red-500 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors`}
+              />
             </div>
           </div>
 

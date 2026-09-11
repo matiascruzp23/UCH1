@@ -1,6 +1,6 @@
 {
   "name": "Universidad de Chile",
-  "description": "Aplicación del plantel de Universidad de Chile con gestión de 10 jugadores, evaluaciones técnica, táctica y condicional, y persistencia en Supabase.",
+  "description": "Gestión del plantel oficial de Universidad de Chile con ficha individual detallada (edad, pie, altura, posición), registro estadístico de partidos y evaluaciones de rendimiento.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

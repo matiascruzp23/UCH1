@@ -95,9 +95,18 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
       <div>
         {/* Top bar: Position and Dorsal */}
         <div className="flex items-center justify-between gap-2 mb-3">
-          <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getPositionBadgeColor(player.posicion)}`}>
-            {player.posicion}
-          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${getPositionBadgeColor(player.posicion)}`}>
+              {player.posicionDetallada || player.posicion}
+            </span>
+            {player.posicionDetallada && player.posicionDetallada !== player.posicion && (
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                isDark ? 'bg-slate-800/80 text-slate-300 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-300'
+              }`}>
+                {player.posicion}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-1.5">
             {/* Botón Editar Jugador */}
             <button
@@ -140,33 +149,59 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
         </div>
 
         {/* Player Name and Nationality */}
-        <div className="mb-4">
+        <div className="mb-3">
           <h3 className={`text-xl sm:text-2xl font-black tracking-tight uppercase font-athletic transition-colors ${
             isDark ? 'text-white group-hover:text-red-300' : 'text-slate-900 group-hover:text-red-600'
           }`}>
             {player.nombre} <span className="text-red-600">{player.apellido}</span>
           </h3>
           {player.nacionalidad && (
-            <p className={`text-xs font-medium ${isDark ? 'text-blue-200/70' : 'text-slate-500'}`}>
-              {player.nacionalidad} {player.pieHabil ? `• Perfil ${player.pieHabil}` : ''}
+            <p className={`text-xs font-medium ${isDark ? 'text-blue-200/80' : 'text-slate-500'}`}>
+              {player.nacionalidad}
             </p>
           )}
         </div>
 
-        {/* Vital Data: Fecha de Nacimiento */}
-        <div className={`border rounded-lg p-3 mb-4 text-xs space-y-1.5 ${
+        {/* Vital Data: Edad, Pie, Altura y Posición */}
+        <div className={`border rounded-lg p-2.5 mb-3 text-xs space-y-1.5 ${
           isDark ? 'bg-[#031330] border-blue-900/60' : 'bg-slate-50 border-slate-200'
         }`}>
-          <div className="flex items-center justify-between">
-            <span className={`flex items-center gap-1.5 ${isDark ? 'text-blue-300/80' : 'text-slate-600'}`}>
-              <Calendar className="w-3.5 h-3.5 text-red-500" />
-              Fecha de Nacimiento:
-            </span>
-            <span className={`font-semibold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{formattedDate}</span>
+          <div className="grid grid-cols-2 gap-2 pb-1.5 border-b border-slate-700/30">
+            <div>
+              <span className={`block text-[10px] uppercase font-bold tracking-wider ${isDark ? 'text-blue-300/70' : 'text-slate-500'}`}>
+                Edad
+              </span>
+              <span className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {age} años <span className="text-[10px] opacity-70 font-mono">({formattedDate})</span>
+              </span>
+            </div>
+            <div>
+              <span className={`block text-[10px] uppercase font-bold tracking-wider ${isDark ? 'text-blue-300/70' : 'text-slate-500'}`}>
+                Pie Hábil
+              </span>
+              <span className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {player.pieHabil || 'No especificado'}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center justify-between">
-            <span className={isDark ? 'text-blue-300/80' : 'text-slate-600'}>Edad calculada:</span>
-            <span className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{age} años</span>
+
+          <div className="grid grid-cols-2 gap-2 pt-0.5">
+            <div>
+              <span className={`block text-[10px] uppercase font-bold tracking-wider ${isDark ? 'text-blue-300/70' : 'text-slate-500'}`}>
+                Altura
+              </span>
+              <span className={`font-semibold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {player.altura || 'N/D'}
+              </span>
+            </div>
+            <div>
+              <span className={`block text-[10px] uppercase font-bold tracking-wider ${isDark ? 'text-blue-300/70' : 'text-slate-500'}`}>
+                Posición
+              </span>
+              <span className={`font-semibold truncate block ${isDark ? 'text-white' : 'text-slate-900'}`} title={player.posicionDetallada || player.posicion}>
+                {player.posicionDetallada || player.posicion}
+              </span>
+            </div>
           </div>
         </div>
 

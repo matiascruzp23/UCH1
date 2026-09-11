@@ -90,11 +90,17 @@ create table if not exists public.players (
   apellido text not null,
   dorsal integer not null,
   posicion text not null,
+  posicion_detallada text,
   fecha_nacimiento text not null,
   nacionalidad text,
   pie_habil text,
+  altura text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- Migración segura si la tabla ya existía
+alter table public.players add column if not exists posicion_detallada text;
+alter table public.players add column if not exists altura text;
 
 -- 2. Tabla de Evaluaciones con Historial (1 al 5)
 create table if not exists public.evaluations (
@@ -219,6 +225,8 @@ export async function fetchPlayersFromSupabase(): Promise<Player[] | null> {
       apellido: row.apellido,
       dorsal: row.dorsal,
       posicion: row.posicion,
+      posicionDetallada: row.posicion_detallada || row.posicion,
+      altura: row.altura || undefined,
       fechaNacimiento: row.fecha_nacimiento,
       nacionalidad: row.nacionalidad,
       pieHabil: row.pie_habil
@@ -234,12 +242,14 @@ export async function fetchPlayersFromSupabase(): Promise<Player[] | null> {
  */
 export async function savePlayerToSupabase(player: Player): Promise<{ success: boolean; error?: string }> {
   try {
-    const payload = {
+    const payload: any = {
       id: player.id,
       nombre: player.nombre,
       apellido: player.apellido,
       dorsal: player.dorsal,
       posicion: player.posicion,
+      posicion_detallada: player.posicionDetallada || player.posicion,
+      altura: player.altura || null,
       fecha_nacimiento: player.fechaNacimiento,
       nacionalidad: player.nacionalidad || null,
       pie_habil: player.pieHabil || null
