@@ -1,6 +1,6 @@
 import React from 'react';
 import { TabType } from '../types';
-import { Users, BarChart3, Shield, Copy, Check, Database, CheckCircle2, AlertTriangle, Sun, Moon } from 'lucide-react';
+import { Users, BarChart3, Shield, Copy, Check, Database, CheckCircle2, AlertTriangle, Sun, Moon, Trophy } from 'lucide-react';
 import { SupabaseStatus } from '../lib/supabase';
 import { useTheme } from '../context/ThemeContext';
 
@@ -9,6 +9,7 @@ interface HeaderProps {
   setActiveTab: (tab: TabType) => void;
   playerCount: number;
   evaluationsCount: number;
+  matchCount?: number;
   onOpenPromptModal: () => void;
   onOpenSupabaseModal: () => void;
   supabaseStatus: SupabaseStatus | null;
@@ -19,6 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   playerCount,
   evaluationsCount,
+  matchCount = 0,
   onOpenPromptModal,
   onOpenSupabaseModal,
   supabaseStatus
@@ -153,7 +155,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="tab-evaluaciones"
             onClick={() => setActiveTab('evaluaciones')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wider font-athletic transition-all cursor-pointer border-2 ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wider font-athletic transition-all cursor-pointer border-2 whitespace-nowrap ${
               activeTab === 'evaluaciones'
                 ? 'bg-red-600 text-white border-red-500 shadow-lg shadow-red-900/40'
                 : isDark
@@ -167,6 +169,26 @@ export const Header: React.FC<HeaderProps> = ({
               activeTab === 'evaluaciones' ? 'bg-white/20 text-white' : 'bg-blue-900/60 text-blue-200'
             }`}>
               {evaluationsCount}
+            </span>
+          </button>
+
+          <button
+            id="tab-estadisticas"
+            onClick={() => setActiveTab('estadisticas')}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm sm:text-base uppercase tracking-wider font-athletic transition-all cursor-pointer border-2 whitespace-nowrap ${
+              activeTab === 'estadisticas'
+                ? 'bg-red-600 text-white border-red-500 shadow-lg shadow-red-900/40'
+                : isDark
+                  ? 'bg-[#061e47] text-blue-200 hover:text-white hover:bg-[#0a2b66] border-red-600/40'
+                  : 'bg-[#001f5c] text-blue-100 hover:text-white hover:bg-[#001642] border-red-600/50'
+            }`}
+          >
+            <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span>3. Partidos y Estadísticas</span>
+            <span className={`ml-1 text-xs px-2 py-0.5 rounded-full font-sans font-bold ${
+              activeTab === 'estadisticas' ? 'bg-white/20 text-white' : 'bg-blue-900/60 text-blue-200'
+            }`}>
+              {matchCount}
             </span>
           </button>
         </div>

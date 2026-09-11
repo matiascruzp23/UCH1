@@ -193,54 +193,137 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
           </div>
 
           {/* Fecha de la Evaluación & Tipo de Sesión */}
-          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 border rounded-xl p-3.5 ${
+          <div className={`space-y-2.5 border rounded-xl p-3.5 ${
             isDark ? 'bg-[#020e26] border-blue-900/80' : 'bg-slate-50 border-slate-200'
           }`}>
-            <div>
-              <label className={`block text-xs font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5 ${
-                isDark ? 'text-blue-200' : 'text-slate-700'
-              }`}>
-                <Calendar className="w-3.5 h-3.5 text-red-500" />
-                Fecha de la Evaluación *
-              </label>
-              <input
-                id="input-fecha-evaluacion"
-                type="date"
-                required
-                value={fechaEvaluacion}
-                onChange={(e) => setFechaEvaluacion(e.target.value)}
-                className={`w-full ${
-                  isDark
-                    ? 'bg-[#041638] text-white border-red-600/60'
-                    : 'bg-white text-slate-900 border-slate-300'
-                } border focus:border-red-500 rounded-lg p-2 text-xs focus:outline-none transition-colors`}
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className={`block text-xs font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5 ${
+                  isDark ? 'text-blue-200' : 'text-slate-700'
+                }`}>
+                  <Calendar className="w-3.5 h-3.5 text-red-500" />
+                  Fecha de la Evaluación *
+                </label>
+                <input
+                  id="input-fecha-evaluacion"
+                  type="date"
+                  required
+                  value={fechaEvaluacion}
+                  onChange={(e) => setFechaEvaluacion(e.target.value)}
+                  className={`w-full ${
+                    isDark
+                      ? 'bg-[#041638] text-white border-red-600/60'
+                      : 'bg-white text-slate-900 border-slate-300'
+                  } border focus:border-red-500 rounded-lg p-2 text-xs focus:outline-none transition-colors font-mono`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-xs font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5 ${
+                  isDark ? 'text-blue-200' : 'text-slate-700'
+                }`}>
+                  <ClipboardCheck className="w-3.5 h-3.5 text-red-500" />
+                  Contexto / Tipo de Sesión
+                </label>
+                <select
+                  id="select-tipo-evaluacion"
+                  value={tipoEvaluacion}
+                  onChange={(e) => setTipoEvaluacion(e.target.value)}
+                  className={`w-full ${
+                    isDark
+                      ? 'bg-[#041638] text-white border-blue-800'
+                      : 'bg-white text-slate-900 border-slate-300'
+                  } border focus:border-red-500 rounded-lg p-2 text-xs focus:outline-none cursor-pointer transition-colors`}
+                >
+                  <option value="Partido Oficial">Partido Oficial</option>
+                  <option value="Entrenamiento Táctico">Entrenamiento Táctico</option>
+                  <option value="Control Físico">Control Físico</option>
+                  <option value="Pretemporada">Pretemporada</option>
+                  <option value="Amistoso Formal">Amistoso Formal</option>
+                  <option value="Control Rutinario">Control Rutinario</option>
+                </select>
+              </div>
             </div>
 
-            <div>
-              <label className={`block text-xs font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5 ${
-                isDark ? 'text-blue-200' : 'text-slate-700'
-              }`}>
-                <ClipboardCheck className="w-3.5 h-3.5 text-red-500" />
-                Contexto / Tipo de Sesión
-              </label>
-              <select
-                id="select-tipo-evaluacion"
-                value={tipoEvaluacion}
-                onChange={(e) => setTipoEvaluacion(e.target.value)}
-                className={`w-full ${
-                  isDark
-                    ? 'bg-[#041638] text-white border-blue-800'
-                    : 'bg-white text-slate-900 border-slate-300'
-                } border focus:border-red-500 rounded-lg p-2 text-xs focus:outline-none cursor-pointer transition-colors`}
-              >
-                <option value="Partido Oficial">Partido Oficial</option>
-                <option value="Entrenamiento Táctico">Entrenamiento Táctico</option>
-                <option value="Control Físico">Control Físico</option>
-                <option value="Pretemporada">Pretemporada</option>
-                <option value="Amistoso Formal">Amistoso Formal</option>
-                <option value="Control Rutinario">Control Rutinario</option>
-              </select>
+            {/* Accesos rápidos de fecha retrospectiva */}
+            <div className="pt-1">
+              <div className="flex items-center justify-between flex-wrap gap-1 mb-1">
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? 'text-blue-300' : 'text-slate-500'}`}>
+                  Selección rápida hacia el pasado:
+                </span>
+                <span className="text-[10px] text-red-500 italic">
+                  Se ordenará automáticamente en el gráfico
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setFechaEvaluacion(new Date().toISOString().split('T')[0])}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold border cursor-pointer ${
+                    isDark
+                      ? 'bg-[#031330] hover:bg-red-600/30 text-blue-200 border-blue-800'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300'
+                  }`}
+                >
+                  Hoy
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const d = new Date();
+                    d.setDate(d.getDate() - 1);
+                    setFechaEvaluacion(d.toISOString().split('T')[0]);
+                  }}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold border cursor-pointer ${
+                    isDark
+                      ? 'bg-[#031330] hover:bg-red-600/30 text-blue-200 border-blue-800'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300'
+                  }`}
+                >
+                  Ayer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const d = new Date();
+                    d.setDate(d.getDate() - 7);
+                    setFechaEvaluacion(d.toISOString().split('T')[0]);
+                  }}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold border cursor-pointer ${
+                    isDark
+                      ? 'bg-[#031330] hover:bg-red-600/30 text-blue-200 border-blue-800'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300'
+                  }`}
+                >
+                  -7 días
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const d = new Date();
+                    d.setMonth(d.getMonth() - 1);
+                    setFechaEvaluacion(d.toISOString().split('T')[0]);
+                  }}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold border cursor-pointer ${
+                    isDark
+                      ? 'bg-[#031330] hover:bg-red-600/30 text-blue-200 border-blue-800'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300'
+                  }`}
+                >
+                  -1 mes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFechaEvaluacion('2025-01-15')}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold border cursor-pointer ${
+                    isDark
+                      ? 'bg-[#031330] hover:bg-red-600/30 text-blue-200 border-blue-800'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300'
+                  }`}
+                >
+                  Enero 2025 (Pretemporada)
+                </button>
+              </div>
             </div>
           </div>
 

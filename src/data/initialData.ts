@@ -1,4 +1,4 @@
-import { Player, PlayerEvaluation } from '../types';
+import { Player, PlayerEvaluation, Match, MatchPlayerStat } from '../types';
 
 export const INITIAL_PLAYERS: Player[] = [
   {
@@ -353,5 +353,382 @@ export const INITIAL_EVALUATIONS: PlayerEvaluation[] = [
     tipoEvaluacion: 'Partido Oficial',
     evaluador: 'Cuerpo Técnico UdeC',
     notas: 'Olfato goleador intacto, desmarques de ruptura oportunos y gran anticipación a los centrales.'
+  }
+];
+
+export const INITIAL_MATCHES: Match[] = [
+  {
+    id: 'match-1',
+    rival: 'Colo-Colo',
+    fecha: '2025-02-16',
+    torneo: 'Campeonato Nacional',
+    condicion: 'Local',
+    golesFavor: 2,
+    golesContra: 1,
+    estadio: 'Estadio Nacional',
+    jornada: 'Fecha 1',
+    notas: 'Superclásico chileno. Gran victoria en el Estadio Nacional con tantos de Palacios y Fernández.'
+  },
+  {
+    id: 'match-2',
+    rival: 'Cobreloa',
+    fecha: '2025-02-23',
+    torneo: 'Campeonato Nacional',
+    condicion: 'Visita',
+    golesFavor: 3,
+    golesContra: 1,
+    estadio: 'Zorros del Desierto',
+    jornada: 'Fecha 2',
+    notas: 'Sólido triunfo en la altura con destacada actuación colectiva y contragolpes fulminantes.'
+  },
+  {
+    id: 'match-3',
+    rival: 'Coquimbo Unido',
+    fecha: '2025-03-02',
+    torneo: 'Campeonato Nacional',
+    condicion: 'Local',
+    golesFavor: 1,
+    golesContra: 0,
+    estadio: 'Estadio Nacional',
+    jornada: 'Fecha 3',
+    notas: 'Victoria trabajada con arco en cero gracias a intervenciones clave de Toselli y Zaldivia.'
+  }
+];
+
+export const INITIAL_MATCH_STATS: MatchPlayerStat[] = [
+  // --- PARTIDO 1: vs Colo-Colo (2 - 1) ---
+  {
+    id: 'stat-m1-p6',
+    partidoId: 'match-1',
+    jugadorId: 'uch-6', // Toselli
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m1-p9',
+    partidoId: 'match-1',
+    jugadorId: 'uch-9', // Hormazábal
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 1,
+    tarjetasAmarillas: 1,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m1-p7',
+    partidoId: 'match-1',
+    jugadorId: 'uch-7', // Calderón
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m1-p5',
+    partidoId: 'match-1',
+    jugadorId: 'uch-5', // Zaldivia
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 1,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m1-p8',
+    partidoId: 'match-1',
+    jugadorId: 'uch-8', // Morales
+    condicionJugador: 'Titular',
+    minutosJugados: 82,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m1-p2',
+    partidoId: 'match-1',
+    jugadorId: 'uch-2', // Díaz
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m1-p1',
+    partidoId: 'match-1',
+    jugadorId: 'uch-1', // Aránguiz
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 1,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m1-p4',
+    partidoId: 'match-1',
+    jugadorId: 'uch-4', // Fernández
+    condicionJugador: 'Titular',
+    minutosJugados: 88,
+    goles: 1,
+    asistencias: 0,
+    tarjetasAmarillas: 1,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m1-p10',
+    partidoId: 'match-1',
+    jugadorId: 'uch-10', // Palacios
+    condicionJugador: 'Titular',
+    minutosJugados: 75,
+    goles: 1,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m1-p3',
+    partidoId: 'match-1',
+    jugadorId: 'uch-3', // Assadi
+    condicionJugador: 'Suplente',
+    minutosJugados: 15,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+
+  // --- PARTIDO 2: vs Cobreloa (3 - 1) ---
+  {
+    id: 'stat-m2-p6',
+    partidoId: 'match-2',
+    jugadorId: 'uch-6', // Toselli
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m2-p9',
+    partidoId: 'match-2',
+    jugadorId: 'uch-9', // Hormazábal
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 1,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m2-p7',
+    partidoId: 'match-2',
+    jugadorId: 'uch-7', // Calderón
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 1,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m2-p5',
+    partidoId: 'match-2',
+    jugadorId: 'uch-5', // Zaldivia
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m2-p8',
+    partidoId: 'match-2',
+    jugadorId: 'uch-8', // Morales
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 1,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m2-p2',
+    partidoId: 'match-2',
+    jugadorId: 'uch-2', // Díaz
+    condicionJugador: 'Titular',
+    minutosJugados: 78,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m2-p1',
+    partidoId: 'match-2',
+    jugadorId: 'uch-1', // Aránguiz
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 1,
+    asistencias: 1,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m2-p4',
+    partidoId: 'match-2',
+    jugadorId: 'uch-4', // Fernández
+    condicionJugador: 'Titular',
+    minutosJugados: 70,
+    goles: 1,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m2-p10',
+    partidoId: 'match-2',
+    jugadorId: 'uch-10', // Palacios
+    condicionJugador: 'Titular',
+    minutosJugados: 85,
+    goles: 0,
+    asistencias: 1,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m2-p3',
+    partidoId: 'match-2',
+    jugadorId: 'uch-3', // Assadi
+    condicionJugador: 'Suplente',
+    minutosJugados: 20,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+
+  // --- PARTIDO 3: vs Coquimbo Unido (1 - 0) ---
+  {
+    id: 'stat-m3-p6',
+    partidoId: 'match-3',
+    jugadorId: 'uch-6', // Toselli
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m3-p9',
+    partidoId: 'match-3',
+    jugadorId: 'uch-9', // Hormazábal
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m3-p7',
+    partidoId: 'match-3',
+    jugadorId: 'uch-7', // Calderón
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 1,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m3-p5',
+    partidoId: 'match-3',
+    jugadorId: 'uch-5', // Zaldivia
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m3-p8',
+    partidoId: 'match-3',
+    jugadorId: 'uch-8', // Morales
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 1,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m3-p2',
+    partidoId: 'match-3',
+    jugadorId: 'uch-2', // Díaz
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m3-p1',
+    partidoId: 'match-3',
+    jugadorId: 'uch-1', // Aránguiz
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 0,
+    asistencias: 1,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m3-p3',
+    partidoId: 'match-3',
+    jugadorId: 'uch-3', // Assadi
+    condicionJugador: 'Titular',
+    minutosJugados: 68,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m3-p4',
+    partidoId: 'match-3',
+    jugadorId: 'uch-4', // Fernández
+    condicionJugador: 'Titular',
+    minutosJugados: 90,
+    goles: 1,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
+  },
+  {
+    id: 'stat-m3-p10',
+    partidoId: 'match-3',
+    jugadorId: 'uch-10', // Palacios
+    condicionJugador: 'Titular',
+    minutosJugados: 75,
+    goles: 0,
+    asistencias: 0,
+    tarjetasAmarillas: 0,
+    tarjetasRojas: 0
   }
 ];

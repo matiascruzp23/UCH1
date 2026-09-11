@@ -16,6 +16,7 @@ import {
 import {
   SUPABASE_URL,
   SUPABASE_SQL_SCRIPT,
+  SUPABASE_STATS_SQL_SCRIPT,
   SupabaseStatus,
   checkSupabaseStatus,
   seedInitialDataToSupabase
@@ -44,14 +45,17 @@ export const SupabaseSyncModal: React.FC<SupabaseSyncModalProps> = ({
 }) => {
   const { isDark } = useTheme();
   const [copied, setCopied] = useState(false);
+  const [sqlTab, setSqlTab] = useState<'stats' | 'full'>('stats');
   const [isSeeding, setIsSeeding] = useState(false);
   const [isPulling, setIsPulling] = useState(false);
   const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   if (!isOpen) return null;
 
+  const currentSqlScript = sqlTab === 'stats' ? SUPABASE_STATS_SQL_SCRIPT : SUPABASE_SQL_SCRIPT;
+
   const handleCopySQL = () => {
-    navigator.clipboard.writeText(SUPABASE_SQL_SCRIPT);
+    navigator.clipboard.writeText(currentSqlScript);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
@@ -239,15 +243,46 @@ export const SupabaseSyncModal: React.FC<SupabaseSyncModalProps> = ({
             </div>
 
             <p className={`text-xs leading-relaxed ${isDark ? 'text-blue-200/90' : 'text-slate-600'}`}>
-              Copia el siguiente script SQL y ejecútalo en el <strong>SQL Editor</strong> de tu panel de Supabase. Esto creará las tablas <code className="text-red-500 font-mono font-bold">players</code> y <code className="text-red-500 font-mono font-bold">evaluations</code> con permisos seguros para tu app:
+              Ejecuta el script en el <strong>SQL Editor</strong> de Supabase para crear las tablas con claves foráneas e índices optimizados:
             </p>
+
+            {/* SQL Script Tabs */}
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setSqlTab('stats')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors ${
+                  sqlTab === 'stats'
+                    ? 'bg-red-600 text-white border-red-400 shadow-xs'
+                    : isDark
+                      ? 'bg-[#020d24] text-blue-300 border-blue-900'
+                      : 'bg-white text-slate-700 border-slate-300'
+                }`}
+              >
+                ⭐ Solo Tablas de Estadísticas & Partidos (Nuevo)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSqlTab('full')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors ${
+                  sqlTab === 'full'
+                    ? 'bg-red-600 text-white border-red-400 shadow-xs'
+                    : isDark
+                      ? 'bg-[#020d24] text-blue-300 border-blue-900'
+                      : 'bg-white text-slate-700 border-slate-300'
+                }`}
+              >
+                Script Completo (4 Tablas)
+              </button>
+            </div>
 
             {/* Code Block with Copy Button */}
             <div className="relative">
-              <pre className={`border rounded-lg p-3 text-[11px] font-mono overflow-x-auto max-h-40 ${
+              <pre className={`border rounded-lg p-3 text-[11px] font-mono overflow-x-auto max-h-48 ${
                 isDark ? 'bg-[#020e26] border-blue-900 text-blue-100' : 'bg-white border-slate-300 text-slate-800'
               }`}>
-                {SUPABASE_SQL_SCRIPT}
+                {currentSqlScript}
               </pre>
               <button
                 onClick={handleCopySQL}

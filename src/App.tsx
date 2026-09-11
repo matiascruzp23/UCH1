@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Player, PlayerEvaluation, TabType } from './types';
-import { INITIAL_PLAYERS, INITIAL_EVALUATIONS } from './data/initialData';
+import { Player, PlayerEvaluation, TabType, Match, MatchPlayerStat } from './types';
+import { INITIAL_PLAYERS, INITIAL_EVALUATIONS, INITIAL_MATCHES, INITIAL_MATCH_STATS } from './data/initialData';
 import { Header } from './components/Header';
 import { PlayerCard } from './components/PlayerCard';
 import { EvaluationsView } from './components/EvaluationsView';
@@ -10,6 +10,8 @@ import { PlayerModal } from './components/PlayerModal';
 import { DeletePlayerConfirmModal } from './components/DeletePlayerConfirmModal';
 import { PromptModal } from './components/PromptModal';
 import { SupabaseSyncModal } from './components/SupabaseSyncModal';
+import { StatsView } from './components/StatsView';
+import { MatchModal } from './components/MatchModal';
 import { useTheme } from './context/ThemeContext';
 import {
   SupabaseStatus,
@@ -19,7 +21,13 @@ import {
   saveEvaluationToSupabase,
   deleteEvaluationFromSupabase,
   savePlayerToSupabase,
-  deletePlayerFromSupabase
+  deletePlayerFromSupabase,
+  fetchMatchesFromSupabase,
+  fetchMatchStatsFromSupabase,
+  saveMatchToSupabase,
+  deleteMatchFromSupabase,
+  saveMatchStatsToSupabase,
+  deleteMatchStatsByMatchId
 } from './lib/supabase';
 import { Search, Filter, Database, CheckCircle2, AlertTriangle, UserPlus } from 'lucide-react';
 
@@ -83,6 +91,37 @@ export default function App() {
     return initialMap;
   });
 
+  // Matches and Lineup Statistics State with localStorage fallback
+  const [matches, setMatches] = useState<Match[]>(() => {
+    const saved = localStorage.getItem('uch_matches');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error('Error loading matches from localStorage', e);
+      }
+    }
+    return INITIAL_MATCHES;
+  });
+
+  const [matchStats, setMatchStats] = useState<MatchPlayerStat[]>(() => {
+    const saved = localStorage.getItem('uch_match_stats');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error('Error loading match stats from localStorage', e);
+      }
+    }
+    return INITIAL_MATCH_STATS;
+  });
+
   // Filters for Plantilla view
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPosition, setSelectedPosition] = useState<string>('TODOS');
@@ -91,6 +130,10 @@ export default function App() {
   const [selectedPlayerForEval, setSelectedPlayerForEval] = useState<Player | null>(null);
   const [selectedEvaluationToEdit, setSelectedEvaluationToEdit] = useState<PlayerEvaluation | null>(null);
   const [selectedPlayerForHistory, setSelectedPlayerForHistory] = useState<Player | null>(null);
+
+  // Modals state for Matches
+  const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
+  const [selectedMatchToEdit, setSelectedMatchToEdit] = useState<Match | null>(null);
 
   // Modals state for Player Add / Edit / Delete
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
@@ -120,6 +163,14 @@ export default function App() {
       if (remoteEvals && Object.keys(remoteEvals).length > 0) {
         setEvaluations(remoteEvals);
       }
+      const remoteMatches = await fetchMatchesFromSupabase();
+      if (remoteMatches && remoteMatches.length > 0) {
+        setMatches(remoteMatches);
+      }
+      const remoteMatchStats = await fetchMatchStatsFromSupabase();
+      if (remoteMatchStats && remoteMatchStats.length > 0) {
+        setMatchStats(remoteMatchStats);
+      }
     }
   }, []);
 
@@ -136,6 +187,16 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('uch_evaluations_history', JSON.stringify(evaluations));
   }, [evaluations]);
+
+  // Save matches to localStorage
+  useEffect(() => {
+    localStorage.setItem('uch_matches', JSON.stringify(matches));
+  }, [matches]);
+
+  // Save match stats to localStorage
+  useEffect(() => {
+    localStorage.setItem('uch_match_stats', JSON.stringify(matchStats));
+  }, [matchStats]);
 
   // Total count of all evaluations recorded in history
   const totalEvaluationsCount = Object.values(evaluations).reduce(
@@ -276,6 +337,62 @@ export default function App() {
     }
   };
 
+  // ================= MATCH AND STATISTICS HANDLERS =================
+
+  // Open modal to add a new match
+  const handleOpenNewMatch = () => {
+    setSelectedMatchToEdit(null);
+    setIsMatchModalOpen(true);
+  };
+
+  // Open modal to edit existing match
+  const handleOpenEditMatch = (match: Match) => {
+    setSelectedMatchToEdit(match);
+    setIsMatchModalOpen(true);
+  };
+
+  // Save match and its lineup / statistics
+  const handleSaveMatch = async (matchData: Match, statsData: MatchPlayerStat[]) => {
+    // 1. Update matches state
+    setMatches((prev) => {
+      const exists = prev.some((m) => m.id === matchData.id);
+      if (exists) {
+        return prev.map((m) => (m.id === matchData.id ? matchData : m));
+      }
+      return [matchData, ...prev];
+    });
+
+    // 2. Update matchStats state: remove old stats for this match, add new ones
+    setMatchStats((prev) => {
+      const filtered = prev.filter((s) => s.partidoId !== matchData.id);
+      return [...filtered, ...statsData];
+    });
+
+    // 3. Sync to Supabase if connected
+    if (supabaseStatus?.tablesExist) {
+      await saveMatchToSupabase(matchData);
+      await deleteMatchStatsByMatchId(matchData.id);
+      if (statsData.length > 0) {
+        await saveMatchStatsToSupabase(statsData);
+      }
+    }
+  };
+
+  // Delete match and all its associated player stats
+  const handleDeleteMatch = async (matchId: string) => {
+    // 1. Remove from local matches
+    setMatches((prev) => prev.filter((m) => m.id !== matchId));
+
+    // 2. Remove all stats for this match
+    setMatchStats((prev) => prev.filter((s) => s.partidoId !== matchId));
+
+    // 3. Remove from Supabase if tables exist
+    if (supabaseStatus?.tablesExist) {
+      await deleteMatchStatsByMatchId(matchId);
+      await deleteMatchFromSupabase(matchId);
+    }
+  };
+
   // Pull latest data from Supabase manually
   const handlePullFromSupabase = async () => {
     const remotePlayers = await fetchPlayersFromSupabase();
@@ -285,6 +402,14 @@ export default function App() {
     const remoteEvals = await fetchEvaluationsFromSupabase();
     if (remoteEvals && Object.keys(remoteEvals).length > 0) {
       setEvaluations(remoteEvals);
+    }
+    const remoteMatches = await fetchMatchesFromSupabase();
+    if (remoteMatches && remoteMatches.length > 0) {
+      setMatches(remoteMatches);
+    }
+    const remoteMatchStats = await fetchMatchStatsFromSupabase();
+    if (remoteMatchStats && remoteMatchStats.length > 0) {
+      setMatchStats(remoteMatchStats);
     }
   };
 
@@ -310,6 +435,7 @@ export default function App() {
         setActiveTab={setActiveTab}
         playerCount={players.length}
         evaluationsCount={totalEvaluationsCount}
+        matchCount={matches.length}
         onOpenPromptModal={() => setIsPromptModalOpen(true)}
         onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
         supabaseStatus={supabaseStatus}
@@ -491,6 +617,21 @@ export default function App() {
             onDeleteEvaluation={handleDeleteEvaluation}
           />
         )}
+
+        {/* TAB 3: PARTIDOS Y REGISTRO ESTADÍSTICO */}
+        {activeTab === 'estadisticas' && (
+          <StatsView
+            players={players}
+            matches={matches}
+            matchStats={matchStats}
+            evaluations={(Object.values(evaluations) as PlayerEvaluation[][]).flat()}
+            onOpenNewMatchModal={handleOpenNewMatch}
+            onEditMatch={handleOpenEditMatch}
+            onDeleteMatch={handleDeleteMatch}
+            onOpenPlayerHistory={(player) => setSelectedPlayerForHistory(player)}
+            onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
+          />
+        )}
       </main>
 
       {/* Footer */}
@@ -509,10 +650,12 @@ export default function App() {
             }`}>
               Club Universidad de Chile
             </span>
-            <span>• Plantel Profesional & Historial de Evaluaciones</span>
+            <span>• Plantel Profesional, Estadísticas & Historial</span>
           </div>
           <div className="flex items-center gap-4 text-[11px]">
-            <span>{players.length} Jugadores en Plantilla</span>
+            <span>{players.length} Jugadores</span>
+            <span>•</span>
+            <span>{matches.length} Partidos</span>
             <span>•</span>
             <button
               onClick={() => setIsSupabaseModalOpen(true)}
@@ -531,7 +674,6 @@ export default function App() {
           </div>
         </div>
       </footer>
-
 
       {/* Player Add / Edit Modal */}
       <PlayerModal
@@ -568,11 +710,13 @@ export default function App() {
         onSaveEvaluation={handleSaveEvaluation}
       />
 
-      {/* Player History Detailed Modal */}
+      {/* Player History Detailed Modal (Evolution chart + Match participation) */}
       <PlayerHistoryModal
         isOpen={Boolean(selectedPlayerForHistory)}
         player={selectedPlayerForHistory}
         evaluations={selectedPlayerForHistory ? evaluations[selectedPlayerForHistory.id] || [] : []}
+        matches={matches}
+        matchStats={matchStats}
         onClose={() => setSelectedPlayerForHistory(null)}
         onAddNewEvaluation={(player) => {
           handleOpenAddEvaluation(player);
@@ -581,6 +725,19 @@ export default function App() {
           handleOpenEditEvaluation(player, evaluation);
         }}
         onDeleteEvaluation={handleDeleteEvaluation}
+      />
+
+      {/* Match and Lineup Statistics Modal */}
+      <MatchModal
+        isOpen={isMatchModalOpen}
+        onClose={() => {
+          setIsMatchModalOpen(false);
+          setSelectedMatchToEdit(null);
+        }}
+        matchToEdit={selectedMatchToEdit}
+        existingStats={selectedMatchToEdit ? matchStats.filter((s) => s.partidoId === selectedMatchToEdit.id) : []}
+        players={players}
+        onSaveMatch={handleSaveMatch}
       />
 
       {/* Supabase Sync and Management Modal */}

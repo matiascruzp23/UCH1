@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { Player, PlayerEvaluation } from '../types';
+import { Player, PlayerEvaluation, Match, MatchPlayerStat } from '../types';
 
 // Default configuration with the user's provided Supabase credentials
 const RAW_URL = import.meta.env.VITE_SUPABASE_URL || 'https://ggilenmealydjwbxwdbb.supabase.co';
@@ -19,11 +19,68 @@ export interface SupabaseStatus {
   lastChecked: Date;
 }
 
-// SQL Script ready to run in Supabase SQL Editor
+// SQL Script ONLY for the Statistics & Matches tables
+export const SUPABASE_STATS_SQL_SCRIPT = `-- =======================================================
+-- SCRIPT SQL: REGISTRO ESTADÍSTICO Y PARTIDOS (SUPABASE)
+-- Universidad de Chile - Módulo de Estadísticas y Minutos
+-- Ejecuta este script en: https://supabase.com/dashboard/project/ggilenmealydjwbxwdbb/sql
+-- =======================================================
+
+-- 1. Tabla de Partidos (Matches)
+create table if not exists public.matches (
+  id text primary key,
+  rival text not null,
+  fecha date not null,
+  torneo text not null,
+  condicion text not null check (condicion in ('Local', 'Visita')),
+  goles_favor integer not null default 0 check (goles_favor >= 0),
+  goles_contra integer not null default 0 check (goles_contra >= 0),
+  estadio text,
+  jornada text,
+  notas text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 2. Tabla de Estadísticas de Jugadores por Partido (Match Player Stats)
+create table if not exists public.match_player_stats (
+  id text primary key,
+  partido_id text not null references public.matches(id) on delete cascade,
+  jugador_id text not null references public.players(id) on delete cascade,
+  condicion_jugador text not null check (condicion_jugador in ('Titular', 'Suplente', 'No convocado')),
+  minutos_jugados integer not null default 0 check (minutos_jugados >= 0),
+  goles integer not null default 0 check (goles >= 0),
+  asistencias integer not null default 0 check (asistencias >= 0),
+  tarjetas_amarillas integer not null default 0 check (tarjetas_amarillas >= 0),
+  tarjetas_rojas integer not null default 0 check (tarjetas_rojas >= 0),
+  notas text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  constraint unique_partido_jugador unique (partido_id, jugador_id)
+);
+
+-- 3. Índices para acelerar consultas y ordenamientos
+create index if not exists idx_matches_fecha on public.matches(fecha desc);
+create index if not exists idx_match_stats_partido on public.match_player_stats(partido_id);
+create index if not exists idx_match_stats_jugador on public.match_player_stats(jugador_id);
+
+-- 4. Habilitar Row Level Security (RLS)
+alter table public.matches enable row level security;
+alter table public.match_player_stats enable row level security;
+
+-- 5. Crear Políticas de Acceso Público para la clave Anon
+drop policy if exists "Acceso total a matches" on public.matches;
+create policy "Acceso total a matches" on public.matches
+  for all using (true) with check (true);
+
+drop policy if exists "Acceso total a match_player_stats" on public.match_player_stats;
+create policy "Acceso total a match_player_stats" on public.match_player_stats
+  for all using (true) with check (true);
+`;
+
+// Complete Unified SQL Script for ALL tables (Players + Evaluations + Matches + Stats)
 export const SUPABASE_SQL_SCRIPT = `-- =======================================================
--- SCRIPT DE INICIALIZACIÓN: UNIVERSIDAD DE CHILE EN SUPABASE
--- Ejecuta este script en el "SQL Editor" de tu proyecto Supabase:
--- https://supabase.com/dashboard/project/ggilenmealydjwbxwdbb/sql
+-- SCRIPT COMPLETO UNIFICADO: UNIVERSIDAD DE CHILE EN SUPABASE
+-- Incluye: Plantel, Evaluaciones y Registro Estadístico de Partidos
+-- Ejecuta en el SQL Editor: https://supabase.com/dashboard/project/ggilenmealydjwbxwdbb/sql
 -- =======================================================
 
 -- 1. Tabla de Jugadores
@@ -53,17 +110,58 @@ create table if not exists public.evaluations (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 3. Habilitar Row Level Security (RLS)
+-- 3. Tabla de Partidos (Matches)
+create table if not exists public.matches (
+  id text primary key,
+  rival text not null,
+  fecha date not null,
+  torneo text not null,
+  condicion text not null check (condicion in ('Local', 'Visita')),
+  goles_favor integer not null default 0 check (goles_favor >= 0),
+  goles_contra integer not null default 0 check (goles_contra >= 0),
+  estadio text,
+  jornada text,
+  notas text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 4. Tabla de Estadísticas de Jugadores por Partido
+create table if not exists public.match_player_stats (
+  id text primary key,
+  partido_id text not null references public.matches(id) on delete cascade,
+  jugador_id text not null references public.players(id) on delete cascade,
+  condicion_jugador text not null check (condicion_jugador in ('Titular', 'Suplente', 'No convocado')),
+  minutos_jugados integer not null default 0 check (minutos_jugados >= 0),
+  goles integer not null default 0 check (goles >= 0),
+  asistencias integer not null default 0 check (asistencias >= 0),
+  tarjetas_amarillas integer not null default 0 check (tarjetas_amarillas >= 0),
+  tarjetas_rojas integer not null default 0 check (tarjetas_rojas >= 0),
+  notas text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  constraint unique_partido_jugador unique (partido_id, jugador_id)
+);
+
+-- 5. Habilitar Row Level Security (RLS)
 alter table public.players enable row level security;
 alter table public.evaluations enable row level security;
+alter table public.matches enable row level security;
+alter table public.match_player_stats enable row level security;
 
--- 4. Crear Políticas de Acceso Público para la clave Anon
+-- 6. Crear Políticas de Acceso Público para la clave Anon
 drop policy if exists "Acceso total a players" on public.players;
 create policy "Acceso total a players" on public.players
   for all using (true) with check (true);
 
 drop policy if exists "Acceso total a evaluations" on public.evaluations;
 create policy "Acceso total a evaluations" on public.evaluations
+  for all using (true) with check (true);
+
+drop policy if exists "Acceso total a matches" on public.matches;
+create policy "Acceso total a matches" on public.matches
+  for all using (true) with check (true);
+
+drop policy if exists "Acceso total a match_player_stats" on public.match_player_stats;
+create policy "Acceso total a match_player_stats" on public.match_player_stats
   for all using (true) with check (true);
 `;
 
@@ -301,5 +399,147 @@ export async function seedInitialDataToSupabase(
     return { success: true, message: '¡Plantilla y evaluaciones sincronizadas exitosamente con Supabase!' };
   } catch (err: any) {
     return { success: false, message: err?.message || 'Error inesperado durante la sincronización' };
+  }
+}
+
+/**
+ * Fetch all matches from Supabase
+ */
+export async function fetchMatchesFromSupabase(): Promise<Match[] | null> {
+  try {
+    const { data, error } = await supabase.from('matches').select('*').order('fecha', { ascending: false });
+    if (error || !data) return null;
+
+    return data.map((row: any) => ({
+      id: row.id,
+      rival: row.rival,
+      fecha: row.fecha,
+      torneo: row.torneo,
+      condicion: row.condicion,
+      golesFavor: row.goles_favor ?? 0,
+      golesContra: row.goles_contra ?? 0,
+      estadio: row.estadio || undefined,
+      jornada: row.jornada || undefined,
+      notas: row.notas || undefined
+    }));
+  } catch (err) {
+    console.error('Error fetching matches from Supabase', err);
+    return null;
+  }
+}
+
+/**
+ * Save / Upsert a single match to Supabase
+ */
+export async function saveMatchToSupabase(match: Match): Promise<{ success: boolean; error?: string }> {
+  try {
+    const payload = {
+      id: match.id,
+      rival: match.rival,
+      fecha: match.fecha,
+      torneo: match.torneo,
+      condicion: match.condicion,
+      goles_favor: match.golesFavor,
+      goles_contra: match.golesContra,
+      estadio: match.estadio || null,
+      jornada: match.jornada || null,
+      notas: match.notas || null
+    };
+
+    const { error } = await supabase.from('matches').upsert(payload);
+    if (error) {
+      console.warn('Supabase match upsert warning:', error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Error al guardar partido en Supabase' };
+  }
+}
+
+/**
+ * Delete a match from Supabase
+ */
+export async function deleteMatchFromSupabase(matchId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase.from('matches').delete().eq('id', matchId);
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Error al eliminar partido de Supabase' };
+  }
+}
+
+/**
+ * Fetch all match player stats from Supabase
+ */
+export async function fetchMatchStatsFromSupabase(): Promise<MatchPlayerStat[] | null> {
+  try {
+    const { data, error } = await supabase.from('match_player_stats').select('*');
+    if (error || !data) return null;
+
+    return data.map((row: any) => ({
+      id: row.id,
+      partidoId: row.partido_id,
+      jugadorId: row.jugador_id,
+      condicionJugador: row.condicion_jugador,
+      minutosJugados: row.minutos_jugados ?? 0,
+      goles: row.goles ?? 0,
+      asistencias: row.asistencias ?? 0,
+      tarjetasAmarillas: row.tarjetas_amarillas ?? 0,
+      tarjetasRojas: row.tarjetas_rojas ?? 0,
+      notas: row.notas || undefined
+    }));
+  } catch (err) {
+    console.error('Error fetching match stats from Supabase', err);
+    return null;
+  }
+}
+
+/**
+ * Save / Upsert match player stats to Supabase
+ */
+export async function saveMatchStatsToSupabase(stats: MatchPlayerStat[]): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!stats || stats.length === 0) return { success: true };
+
+    const payload = stats.map((s) => ({
+      id: s.id,
+      partido_id: s.partidoId,
+      jugador_id: s.jugadorId,
+      condicion_jugador: s.condicionJugador,
+      minutos_jugados: s.minutosJugados,
+      goles: s.goles,
+      asistencias: s.asistencias,
+      tarjetas_amarillas: s.tarjetasAmarillas,
+      tarjetas_rojas: s.tarjetasRojas,
+      notas: s.notas || null
+    }));
+
+    const { error } = await supabase.from('match_player_stats').upsert(payload);
+    if (error) {
+      console.warn('Supabase match stats upsert warning:', error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Error al guardar estadísticas en Supabase' };
+  }
+}
+
+/**
+ * Delete player stats for a given match from Supabase
+ */
+export async function deleteMatchStatsByMatchId(matchId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase.from('match_player_stats').delete().eq('partido_id', matchId);
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Error al eliminar estadísticas del partido' };
   }
 }
