@@ -3,6 +3,7 @@ import { Player, PlayerEvaluation, TabType, Match, MatchPlayerStat } from './typ
 import { INITIAL_PLAYERS, INITIAL_EVALUATIONS, INITIAL_MATCHES, INITIAL_MATCH_STATS } from './data/initialData';
 import { Header } from './components/Header';
 import { PlayerCard } from './components/PlayerCard';
+import { PlayerListView } from './components/PlayerListView';
 import { EvaluationsView } from './components/EvaluationsView';
 import { EvaluationModal } from './components/EvaluationModal';
 import { PlayerHistoryModal } from './components/PlayerHistoryModal';
@@ -28,7 +29,7 @@ import {
   saveMatchStatsToSupabase,
   deleteMatchStatsByMatchId
 } from './lib/supabase';
-import { Search, Filter, Database, CheckCircle2, AlertTriangle, UserPlus } from 'lucide-react';
+import { Search, Filter, Database, CheckCircle2, AlertTriangle, UserPlus, LayoutGrid, List } from 'lucide-react';
 
 export default function App() {
   const { isDark } = useTheme();
@@ -147,6 +148,16 @@ export default function App() {
   const [selectedPlayerForEval, setSelectedPlayerForEval] = useState<Player | null>(null);
   const [selectedEvaluationToEdit, setSelectedEvaluationToEdit] = useState<PlayerEvaluation | null>(null);
   const [selectedPlayerForHistory, setSelectedPlayerForHistory] = useState<Player | null>(null);
+
+  // View mode for Plantilla (grid cards vs list table)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    const saved = localStorage.getItem('uch_plantel_view_mode');
+    return saved === 'list' ? 'list' : 'grid';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('uch_plantel_view_mode', viewMode);
+  }, [viewMode]);
 
   // Modals state for Matches
   const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
@@ -518,9 +529,9 @@ export default function App() {
             {/* Filter, Search Bar & Add Player Action */}
             <div className={`${
               isDark ? 'bg-[#071d44]' : 'bg-white shadow-sm'
-            } border-2 border-red-600 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-md transition-colors`}>
+            } border-2 border-red-600 rounded-xl p-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 shadow-md transition-colors`}>
               {/* Search and Add Player Button */}
-              <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
                 <div className="relative w-full sm:w-72">
                   <Search className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 ${
                     isDark ? 'text-blue-300' : 'text-slate-400'
@@ -550,50 +561,105 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Position Filter Pills */}
-              <div className="flex items-center gap-1.5 flex-wrap w-full md:w-auto justify-start md:justify-end">
-                <span className={`text-xs mr-1 flex items-center gap-1 ${
-                  isDark ? 'text-blue-300' : 'text-slate-600'
+              {/* Position Filter Pills & View Mode Toggle */}
+              <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-start lg:justify-end">
+                {/* Position Filter Pills */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className={`text-xs mr-1 flex items-center gap-1 ${
+                    isDark ? 'text-blue-300' : 'text-slate-600'
+                  }`}>
+                    <Filter className="w-3.5 h-3.5 text-red-500" />
+                    Posición:
+                  </span>
+                  {['TODOS', 'ARQUERO', 'DEFENSA', 'MEDIOCAMPISTA', 'DELANTERO'].map((pos) => {
+                    const isSelected = selectedPosition === pos;
+                    return (
+                      <button
+                        key={pos}
+                        onClick={() => setSelectedPosition(pos)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wider transition-colors border cursor-pointer ${
+                          isSelected
+                            ? 'bg-red-600 text-white border-red-400 shadow-sm'
+                            : isDark
+                              ? 'bg-[#031330] text-blue-200 border-blue-900 hover:border-red-500/50 hover:text-white'
+                              : 'bg-slate-100 text-slate-700 border-slate-300 hover:border-red-500/50 hover:text-slate-900'
+                        }`}
+                      >
+                        {pos}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Separator on desktop */}
+                <div className={`hidden sm:block h-6 w-px ${isDark ? 'bg-blue-900/80' : 'bg-slate-300'}`} />
+
+                {/* View Mode Toggle: Tarjetas vs Lista */}
+                <div className={`flex items-center p-1 rounded-lg border ${
+                  isDark ? 'bg-[#031330] border-blue-900' : 'bg-slate-100 border-slate-300'
                 }`}>
-                  <Filter className="w-3.5 h-3.5 text-red-500" />
-                  Posición:
-                </span>
-                {['TODOS', 'ARQUERO', 'DEFENSA', 'MEDIOCAMPISTA', 'DELANTERO'].map((pos) => {
-                  const isSelected = selectedPosition === pos;
-                  return (
-                    <button
-                      key={pos}
-                      onClick={() => setSelectedPosition(pos)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wider transition-colors border ${
-                        isSelected
-                          ? 'bg-red-600 text-white border-red-400 shadow-sm'
-                          : isDark
-                            ? 'bg-[#031330] text-blue-200 border-blue-900 hover:border-red-500/50 hover:text-white'
-                            : 'bg-slate-100 text-slate-700 border-slate-300 hover:border-red-500/50 hover:text-slate-900'
-                      }`}
-                    >
-                      {pos}
-                    </button>
-                  );
-                })}
+                  <button
+                    id="btn-view-mode-grid"
+                    type="button"
+                    onClick={() => setViewMode('grid')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      viewMode === 'grid'
+                        ? 'bg-red-600 text-white shadow-xs'
+                        : isDark
+                          ? 'text-blue-300 hover:text-white'
+                          : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                    title="Vista en modo Tarjetas"
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span>Tarjetas</span>
+                  </button>
+                  <button
+                    id="btn-view-mode-list"
+                    type="button"
+                    onClick={() => setViewMode('list')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      viewMode === 'list'
+                        ? 'bg-red-600 text-white shadow-xs'
+                        : isDark
+                          ? 'text-blue-300 hover:text-white'
+                          : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                    title="Vista en modo Lista"
+                  >
+                    <List className="w-3.5 h-3.5" />
+                    <span>Lista</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Grid of Players */}
+            {/* Display Players: Cards Grid vs Table List */}
             {filteredPlayers.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {filteredPlayers.map((player) => (
-                  <PlayerCard
-                    key={player.id}
-                    player={player}
-                    evaluations={evaluations[player.id] || []}
-                    onSelectPlayer={(p) => setSelectedPlayerForHistory(p)}
-                    onAddNewEvaluation={(p) => handleOpenAddEvaluation(p)}
-                    onEditPlayer={(p) => handleOpenEditPlayer(p)}
-                    onDeletePlayer={(p) => handleOpenDeletePlayer(p)}
-                  />
-                ))}
-              </div>
+              viewMode === 'grid' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {filteredPlayers.map((player) => (
+                    <PlayerCard
+                      key={player.id}
+                      player={player}
+                      evaluations={evaluations[player.id] || []}
+                      onSelectPlayer={(p) => setSelectedPlayerForHistory(p)}
+                      onAddNewEvaluation={(p) => handleOpenAddEvaluation(p)}
+                      onEditPlayer={(p) => handleOpenEditPlayer(p)}
+                      onDeletePlayer={(p) => handleOpenDeletePlayer(p)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <PlayerListView
+                  players={filteredPlayers}
+                  evaluations={evaluations}
+                  onSelectPlayer={(p) => setSelectedPlayerForHistory(p)}
+                  onAddNewEvaluation={(p) => handleOpenAddEvaluation(p)}
+                  onEditPlayer={(p) => handleOpenEditPlayer(p)}
+                  onDeletePlayer={(p) => handleOpenDeletePlayer(p)}
+                />
+              )
             ) : (
               <div className={`${
                 isDark ? 'bg-[#071d44] text-blue-200' : 'bg-white text-slate-700 shadow-md'
