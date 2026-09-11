@@ -229,12 +229,24 @@ export const StatsView: React.FC<StatsViewProps> = ({
       >
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider bg-red-600/30 text-red-200 border border-red-500/40 px-2 py-0.5 rounded">
+            <span
+              className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
+                isDark
+                  ? 'bg-red-600/30 text-red-200 border-red-500/40'
+                  : 'bg-red-100 text-red-700 border-red-300'
+              }`}
+            >
               Estadísticas y Competencia
             </span>
-            <span className="text-xs text-blue-400 font-medium">Temporada 2025</span>
+            <span className={`text-xs font-semibold ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>
+              Temporada 2025
+            </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black uppercase text-white font-athletic tracking-tight">
+          <h2
+            className={`text-2xl sm:text-3xl font-black uppercase font-athletic tracking-tight ${
+              isDark ? 'text-white' : 'text-slate-900'
+            }`}
+          >
             Registro Estadístico de Partidos y Minutos
           </h2>
           <p className={`text-xs sm:text-sm ${isDark ? 'text-blue-200' : 'text-slate-600'}`}>
@@ -282,12 +294,22 @@ export const StatsView: React.FC<StatsViewProps> = ({
             <Trophy className="w-4 h-4 text-red-500" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="font-athletic text-2xl sm:text-3xl font-black text-white">
+            <span
+              className={`font-athletic text-2xl sm:text-3xl font-black ${
+                isDark ? 'text-white' : 'text-slate-900'
+              }`}
+            >
               {totalMatches}
             </span>
-            <span className="text-xs font-semibold text-emerald-400">{wins}G</span>
-            <span className="text-xs font-semibold text-amber-400">{draws}E</span>
-            <span className="text-xs font-semibold text-red-400">{losses}P</span>
+            <span className={`text-xs font-bold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+              {wins}G
+            </span>
+            <span className={`text-xs font-bold ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>
+              {draws}E
+            </span>
+            <span className={`text-xs font-bold ${isDark ? 'text-red-400' : 'text-red-600'}`}>
+              {losses}P
+            </span>
           </div>
           <div className={`text-[11px] mt-1 ${isDark ? 'text-blue-200' : 'text-slate-600'}`}>
             Goles: {totalGolesFavor} favor / {totalGolesContra} contra ({goalDiff >= 0 ? `+${goalDiff}` : goalDiff})
@@ -310,9 +332,13 @@ export const StatsView: React.FC<StatsViewProps> = ({
             <span className="font-athletic text-2xl sm:text-3xl font-black text-red-500">
               {topScorer?.golesTotales || 0}
             </span>
-            <span className="text-xs text-slate-400">goles</span>
+            <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>goles</span>
           </div>
-          <div className="text-xs font-bold text-white truncate mt-1">
+          <div
+            className={`text-xs font-bold truncate mt-1 ${
+              isDark ? 'text-white' : 'text-slate-900'
+            }`}
+          >
             {topScorer ? `${topScorer.jugador.nombre} ${topScorer.jugador.apellido}` : 'Sin registros'}
           </div>
         </div>
@@ -333,9 +359,13 @@ export const StatsView: React.FC<StatsViewProps> = ({
             <span className="font-athletic text-2xl sm:text-3xl font-black text-blue-500">
               {topAssister?.asistenciasTotales || 0}
             </span>
-            <span className="text-xs text-slate-400">asistencias</span>
+            <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>asistencias</span>
           </div>
-          <div className="text-xs font-bold text-white truncate mt-1">
+          <div
+            className={`text-xs font-bold truncate mt-1 ${
+              isDark ? 'text-white' : 'text-slate-900'
+            }`}
+          >
             {topAssister ? `${topAssister.jugador.nombre} ${topAssister.jugador.apellido}` : 'Sin registros'}
           </div>
         </div>
@@ -353,12 +383,16 @@ export const StatsView: React.FC<StatsViewProps> = ({
             <Clock className="w-4 h-4 text-emerald-500" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="font-athletic text-2xl sm:text-3xl font-black text-emerald-400">
+            <span className="font-athletic text-2xl sm:text-3xl font-black text-emerald-500">
               {topMinutes?.minutosTotales || 0}'
             </span>
-            <span className="text-xs text-slate-400">minutos</span>
+            <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>minutos</span>
           </div>
-          <div className="text-xs font-bold text-white truncate mt-1">
+          <div
+            className={`text-xs font-bold truncate mt-1 ${
+              isDark ? 'text-white' : 'text-slate-900'
+            }`}
+          >
             {topMinutes ? `${topMinutes.jugador.nombre} ${topMinutes.jugador.apellido}` : 'Sin registros'}
           </div>
         </div>
@@ -423,7 +457,11 @@ export const StatsView: React.FC<StatsViewProps> = ({
               } border-2 border-red-600 rounded-2xl p-10 text-center space-y-3`}
             >
               <Trophy className="w-12 h-12 text-red-500 mx-auto opacity-80" />
-              <h3 className="text-lg font-bold uppercase text-white font-athletic">
+              <h3
+                className={`text-lg font-bold uppercase font-athletic ${
+                  isDark ? 'text-white' : 'text-slate-900'
+                }`}
+              >
                 No hay partidos registrados aún
               </h3>
               <p className={`text-xs max-w-md mx-auto ${isDark ? 'text-blue-200' : 'text-slate-600'}`}>
@@ -476,7 +514,11 @@ export const StatsView: React.FC<StatsViewProps> = ({
                       } border-2 rounded-2xl p-4 sm:p-5 transition-all hover:border-red-500`}
                     >
                       {/* Top Bar: Match Metadata & Actions */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-700/50">
+                      <div
+                        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b ${
+                          isDark ? 'border-slate-700/50' : 'border-slate-200'
+                        }`}
+                      >
                         <div className="flex items-center gap-2 flex-wrap">
                           <span
                             className={`px-3 py-1 rounded-lg text-xs font-bold font-mono border ${
@@ -500,7 +542,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
                           </span>
 
                           {match.jornada && (
-                            <span className="text-xs text-slate-400 font-medium">
+                            <span className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                               • {match.jornada}
                             </span>
                           )}
@@ -508,21 +550,31 @@ export const StatsView: React.FC<StatsViewProps> = ({
                           <span
                             className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase border ${
                               match.condicion === 'Local'
-                                ? 'bg-red-600/30 text-red-200 border-red-500/50'
-                                : 'bg-blue-600/30 text-blue-200 border-blue-500/50'
+                                ? isDark
+                                  ? 'bg-red-600/30 text-red-200 border-red-500/50'
+                                  : 'bg-red-100 text-red-700 border-red-300'
+                                : isDark
+                                ? 'bg-blue-600/30 text-blue-200 border-blue-500/50'
+                                : 'bg-blue-100 text-blue-800 border-blue-300'
                             }`}
                           >
                             {match.condicion}
                           </span>
 
                           {match.estadio && (
-                            <span className="text-xs text-slate-400">
+                            <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                               📍 {match.estadio}
                             </span>
                           )}
 
                           {/* Tactical Formation Badge */}
-                          <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-red-600/20 text-red-300 border border-red-500/40">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold border ${
+                              isDark
+                                ? 'bg-red-600/20 text-red-300 border-red-500/40'
+                                : 'bg-red-50 text-red-700 border-red-200'
+                            }`}
+                          >
                             {formationKey}
                           </span>
                         </div>
@@ -589,10 +641,20 @@ export const StatsView: React.FC<StatsViewProps> = ({
                               referrerPolicy="no-referrer"
                             />
                             <div className="text-left min-w-[100px]">
-                              <span className="font-athletic font-extrabold text-lg sm:text-xl uppercase block text-white">
+                              <span
+                                className={`font-athletic font-extrabold text-lg sm:text-xl uppercase block ${
+                                  isDark ? 'text-white' : 'text-[#002b7a]'
+                                }`}
+                              >
                                 U. de Chile
                               </span>
-                              <span className="text-[10px] text-blue-300 font-medium">Club Universidad de Chile</span>
+                              <span
+                                className={`text-[10px] font-medium ${
+                                  isDark ? 'text-blue-300' : 'text-slate-500'
+                                }`}
+                              >
+                                Club Universidad de Chile
+                              </span>
                             </div>
                           </div>
 
@@ -600,30 +662,48 @@ export const StatsView: React.FC<StatsViewProps> = ({
                           <div
                             className={`px-4 py-2 rounded-xl font-athletic text-2xl sm:text-3xl font-black tracking-wider border-2 flex items-center gap-3 ${
                               isWin
-                                ? 'bg-emerald-600/30 text-emerald-400 border-emerald-500 shadow-md'
+                                ? isDark
+                                  ? 'bg-emerald-600/30 text-emerald-400 border-emerald-500 shadow-md'
+                                  : 'bg-emerald-100 text-emerald-800 border-emerald-400 shadow-sm'
                                 : isDraw
+                                ? isDark
                                   ? 'bg-amber-500/20 text-amber-400 border-amber-500 shadow-md'
-                                  : 'bg-red-600/30 text-red-400 border-red-500 shadow-md'
+                                  : 'bg-amber-100 text-amber-800 border-amber-400 shadow-sm'
+                                : isDark
+                                ? 'bg-red-600/30 text-red-400 border-red-500 shadow-md'
+                                : 'bg-red-100 text-red-800 border-red-400 shadow-sm'
                             }`}
                           >
                             <span>{match.golesFavor}</span>
-                            <span className="text-base text-slate-400">-</span>
+                            <span className={`text-base ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>-</span>
                             <span>{match.golesContra}</span>
                           </div>
 
                           {/* Rival Name */}
                           <div className="min-w-[120px]">
-                            <span className="font-athletic font-extrabold text-lg sm:text-xl uppercase block text-red-400">
+                            <span
+                              className={`font-athletic font-extrabold text-lg sm:text-xl uppercase block ${
+                                isDark ? 'text-red-400' : 'text-red-600'
+                              }`}
+                            >
                               {match.rival}
                             </span>
-                            <span className="text-[10px] text-slate-400">Rival</span>
+                            <span className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                              Rival
+                            </span>
                           </div>
                         </div>
 
                         {/* Match Goleadores / Incidents summary */}
                         <div className="flex flex-wrap items-center gap-2 text-xs">
                           {goleadores.length > 0 && (
-                            <div className="flex items-center gap-1.5 bg-red-600/20 text-red-200 border border-red-500/40 px-2.5 py-1 rounded-lg">
+                            <div
+                              className={`flex items-center gap-1.5 border px-2.5 py-1 rounded-lg ${
+                                isDark
+                                  ? 'bg-red-600/20 text-red-200 border-red-500/40'
+                                  : 'bg-red-50 text-red-700 border-red-200'
+                              }`}
+                            >
                               <span>⚽</span>
                               {goleadores.map((g) => {
                                 const p = players.find((x) => x.id === g.jugadorId);
@@ -637,16 +717,28 @@ export const StatsView: React.FC<StatsViewProps> = ({
                           )}
 
                           {amonestados.length > 0 && (
-                            <div className="flex items-center gap-1 bg-amber-400/20 text-amber-200 border border-amber-400/40 px-2 py-1 rounded-lg text-[11px]">
+                            <div
+                              className={`flex items-center gap-1 border px-2 py-1 rounded-lg text-[11px] ${
+                                isDark
+                                  ? 'bg-amber-400/20 text-amber-200 border-amber-400/40'
+                                  : 'bg-amber-50 text-amber-800 border-amber-200'
+                              }`}
+                            >
                               <span>🟨</span>
-                              <span>{amonestados.length} amarillas</span>
+                              <span className="font-medium">{amonestados.length} amarillas</span>
                             </div>
                           )}
 
                           {expulsados.length > 0 && (
-                            <div className="flex items-center gap-1 bg-red-600/30 text-red-200 border border-red-600/60 px-2 py-1 rounded-lg text-[11px]">
+                            <div
+                              className={`flex items-center gap-1 border px-2 py-1 rounded-lg text-[11px] ${
+                                isDark
+                                  ? 'bg-red-600/30 text-red-200 border-red-600/60'
+                                  : 'bg-red-100 text-red-800 border-red-300'
+                              }`}
+                            >
                               <span>🟥</span>
-                              <span>{expulsados.length} expulsado(s)</span>
+                              <span className="font-medium">{expulsados.length} expulsado(s)</span>
                             </div>
                           )}
                         </div>
@@ -685,7 +777,11 @@ export const StatsView: React.FC<StatsViewProps> = ({
                       >
                         {/* Titulares */}
                         <div>
-                          <span className={`text-[10px] uppercase font-bold tracking-wider block mb-1 text-emerald-400`}>
+                          <span
+                            className={`text-[10px] uppercase font-bold tracking-wider block mb-1 ${
+                              isDark ? 'text-emerald-400' : 'text-emerald-700'
+                            }`}
+                          >
                             Titulares ({titulares.length}):
                           </span>
                           <div className="flex flex-wrap gap-1.5">
@@ -705,9 +801,15 @@ export const StatsView: React.FC<StatsViewProps> = ({
                                 >
                                   <span className="font-athletic font-bold text-red-500">#{p.dorsal}</span>
                                   <span>{p.apellido}</span>
-                                  <span className="text-[10px] text-slate-400">({t.minutosJugados}')</span>
-                                  {t.goles > 0 && <span className="text-red-400">⚽{t.goles}</span>}
-                                  {t.asistencias > 0 && <span className="text-blue-400">🅰️{t.asistencias}</span>}
+                                  <span className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    ({t.minutosJugados}')
+                                  </span>
+                                  {t.goles > 0 && <span className="text-red-600 font-bold">⚽{t.goles}</span>}
+                                  {t.asistencias > 0 && (
+                                    <span className={`${isDark ? 'text-blue-400' : 'text-blue-700'} font-bold`}>
+                                      🅰️{t.asistencias}
+                                    </span>
+                                  )}
                                   {t.tarjetasAmarillas > 0 && <span>🟨</span>}
                                   {t.tarjetasRojas > 0 && <span>🟥</span>}
                                 </button>
@@ -719,7 +821,11 @@ export const StatsView: React.FC<StatsViewProps> = ({
                         {/* Suplentes que ingresaron */}
                         {suplentesIngresan.length > 0 && (
                           <div>
-                            <span className={`text-[10px] uppercase font-bold tracking-wider block mb-1 text-blue-400`}>
+                            <span
+                              className={`text-[10px] uppercase font-bold tracking-wider block mb-1 ${
+                                isDark ? 'text-blue-400' : 'text-blue-700'
+                              }`}
+                            >
                               Suplentes que ingresaron ({suplentesIngresan.length}):
                             </span>
                             <div className="flex flex-wrap gap-1.5">
@@ -739,9 +845,15 @@ export const StatsView: React.FC<StatsViewProps> = ({
                                   >
                                     <span className="font-athletic font-bold text-red-500">#{p.dorsal}</span>
                                     <span>{p.apellido}</span>
-                                    <span className="text-[10px] text-slate-400">({s.minutosJugados}')</span>
-                                    {s.goles > 0 && <span className="text-red-400">⚽{s.goles}</span>}
-                                    {s.asistencias > 0 && <span className="text-blue-400">🅰️{s.asistencias}</span>}
+                                    <span className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                                      ({s.minutosJugados}')
+                                    </span>
+                                    {s.goles > 0 && <span className="text-red-600 font-bold">⚽{s.goles}</span>}
+                                    {s.asistencias > 0 && (
+                                      <span className={`${isDark ? 'text-blue-400' : 'text-blue-700'} font-bold`}>
+                                        🅰️{s.asistencias}
+                                      </span>
+                                    )}
                                     {s.tarjetasAmarillas > 0 && <span>🟨</span>}
                                     {s.tarjetasRojas > 0 && <span>🟥</span>}
                                   </button>
@@ -754,7 +866,11 @@ export const StatsView: React.FC<StatsViewProps> = ({
                         {/* Suplentes que no ingresaron (Banca) */}
                         {suplentesNoIngresan.length > 0 && (
                           <div>
-                            <span className={`text-[10px] uppercase font-bold tracking-wider block mb-1 text-slate-400`}>
+                            <span
+                              className={`text-[10px] uppercase font-bold tracking-wider block mb-1 ${
+                                isDark ? 'text-slate-400' : 'text-slate-600'
+                              }`}
+                            >
                               En banca sin minutos ({suplentesNoIngresan.length}):
                             </span>
                             <div className="flex flex-wrap gap-1.5">
@@ -774,7 +890,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
                                   >
                                     <span className="font-mono text-slate-400">#{p.dorsal}</span>
                                     <span>{p.apellido}</span>
-                                    <span className="text-[9px] text-slate-500">(0')</span>
+                                    <span className={`text-[9px] ${isDark ? 'text-slate-500' : 'text-slate-600'}`}>(0')</span>
                                   </button>
                                 );
                               })}
@@ -784,10 +900,18 @@ export const StatsView: React.FC<StatsViewProps> = ({
 
                         {/* Bajas / No convocados / Suspendidos / Lesionados */}
                         {(noCitados.length > 0 || suspendidos.length > 0 || lesionados.length > 0) && (
-                          <div className="flex flex-wrap gap-4 pt-1 border-t border-slate-800/40">
+                          <div
+                            className={`flex flex-wrap gap-4 pt-1 border-t ${
+                              isDark ? 'border-slate-800/40' : 'border-slate-200'
+                            }`}
+                          >
                             {suspendidos.length > 0 && (
                               <div>
-                                <span className="text-[10px] uppercase font-bold text-amber-400 block mb-0.5">
+                                <span
+                                  className={`text-[10px] uppercase font-bold block mb-0.5 ${
+                                    isDark ? 'text-amber-400' : 'text-amber-700'
+                                  }`}
+                                >
                                   🟡 Suspendidos ({suspendidos.length}):
                                 </span>
                                 <div className="flex flex-wrap gap-1">
@@ -797,7 +921,11 @@ export const StatsView: React.FC<StatsViewProps> = ({
                                     return (
                                       <span
                                         key={s.id}
-                                        className="px-1.5 py-0.5 rounded text-[10px] bg-amber-900/30 text-amber-300 border border-amber-600/40"
+                                        className={`px-1.5 py-0.5 rounded text-[10px] border ${
+                                          isDark
+                                            ? 'bg-amber-900/30 text-amber-300 border-amber-600/40'
+                                            : 'bg-amber-100 text-amber-800 border-amber-300'
+                                        }`}
                                       >
                                         #{p.dorsal} {p.apellido}
                                       </span>
@@ -809,7 +937,11 @@ export const StatsView: React.FC<StatsViewProps> = ({
 
                             {lesionados.length > 0 && (
                               <div>
-                                <span className="text-[10px] uppercase font-bold text-rose-400 block mb-0.5">
+                                <span
+                                  className={`text-[10px] uppercase font-bold block mb-0.5 ${
+                                    isDark ? 'text-rose-400' : 'text-rose-700'
+                                  }`}
+                                >
                                   🔴 Lesionados ({lesionados.length}):
                                 </span>
                                 <div className="flex flex-wrap gap-1">
@@ -819,7 +951,11 @@ export const StatsView: React.FC<StatsViewProps> = ({
                                     return (
                                       <span
                                         key={s.id}
-                                        className="px-1.5 py-0.5 rounded text-[10px] bg-rose-900/30 text-rose-300 border border-rose-600/40"
+                                        className={`px-1.5 py-0.5 rounded text-[10px] border ${
+                                          isDark
+                                            ? 'bg-rose-900/30 text-rose-300 border-rose-600/40'
+                                            : 'bg-rose-100 text-rose-800 border-rose-300'
+                                        }`}
                                       >
                                         #{p.dorsal} {p.apellido}
                                       </span>
@@ -831,7 +967,11 @@ export const StatsView: React.FC<StatsViewProps> = ({
 
                             {noCitados.length > 0 && (
                               <div>
-                                <span className="text-[10px] uppercase font-bold text-slate-500 block mb-0.5">
+                                <span
+                                  className={`text-[10px] uppercase font-bold block mb-0.5 ${
+                                    isDark ? 'text-slate-400' : 'text-slate-600'
+                                  }`}
+                                >
                                   🔘 No citados ({noCitados.length}):
                                 </span>
                                 <div className="flex flex-wrap gap-1">
@@ -841,7 +981,11 @@ export const StatsView: React.FC<StatsViewProps> = ({
                                     return (
                                       <span
                                         key={s.id}
-                                        className="px-1.5 py-0.5 rounded text-[10px] bg-zinc-900/40 text-zinc-400 border border-zinc-700/40"
+                                        className={`px-1.5 py-0.5 rounded text-[10px] border ${
+                                          isDark
+                                            ? 'bg-zinc-900/40 text-zinc-400 border-zinc-700/40'
+                                            : 'bg-slate-100 text-slate-700 border-slate-300'
+                                        }`}
                                       >
                                         #{p.dorsal} {p.apellido}
                                       </span>
@@ -878,17 +1022,25 @@ export const StatsView: React.FC<StatsViewProps> = ({
             isDark ? 'bg-[#031533] border-red-600/70' : 'bg-white border-slate-200 shadow-md'
           } border-2 rounded-2xl overflow-hidden transition-colors`}
         >
-          <div className="p-4 sm:p-5 border-b border-slate-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div
+            className={`p-4 sm:p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+              isDark ? 'border-slate-700/50' : 'border-slate-200'
+            }`}
+          >
             <div>
-              <h3 className="font-bold text-sm uppercase tracking-wider text-white flex items-center gap-2">
+              <h3
+                className={`font-bold text-sm uppercase tracking-wider flex items-center gap-2 ${
+                  isDark ? 'text-white' : 'text-slate-900'
+                }`}
+              >
                 <Users className="w-4 h-4 text-red-500" />
                 Planilla Acumulada de Estadísticas y Evaluaciones
               </h3>
-              <p className={`text-xs ${isDark ? 'text-blue-200' : 'text-slate-500'}`}>
+              <p className={`text-xs ${isDark ? 'text-blue-200' : 'text-slate-600'}`}>
                 Haz clic en los encabezados para ordenar por Minutos, Goles, Asistencias o Partidos Jugados
               </p>
             </div>
-            <span className="text-xs text-slate-400">
+            <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600 font-medium'}`}>
               {filteredAndSortedStats.length} jugador(es)
             </span>
           </div>
@@ -903,7 +1055,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
                 <tr>
                   <th
                     onClick={() => handleSort('dorsal')}
-                    className="p-3 cursor-pointer hover:text-white"
+                    className={`p-3 cursor-pointer ${isDark ? 'hover:text-white' : 'hover:text-red-600'}`}
                   >
                     <div className="flex items-center gap-1">
                       <span>Dorsal / Jugador</span>
@@ -913,7 +1065,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
                   <th className="p-3">Posición</th>
                   <th
                     onClick={() => handleSort('partidos')}
-                    className="p-3 text-center cursor-pointer hover:text-white"
+                    className={`p-3 text-center cursor-pointer ${isDark ? 'hover:text-white' : 'hover:text-red-600'}`}
                   >
                     <div className="flex items-center justify-center gap-1">
                       <span>PJ</span>
@@ -923,7 +1075,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
                   <th className="p-3 text-center">TIT / SUP</th>
                   <th
                     onClick={() => handleSort('minutos')}
-                    className="p-3 text-center cursor-pointer hover:text-white"
+                    className={`p-3 text-center cursor-pointer ${isDark ? 'hover:text-white' : 'hover:text-red-600'}`}
                   >
                     <div className="flex items-center justify-center gap-1">
                       <span>MIN</span>
@@ -932,7 +1084,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
                   </th>
                   <th
                     onClick={() => handleSort('goles')}
-                    className="p-3 text-center cursor-pointer hover:text-white"
+                    className={`p-3 text-center cursor-pointer ${isDark ? 'hover:text-white' : 'hover:text-red-600'}`}
                   >
                     <div className="flex items-center justify-center gap-1">
                       <span>GOL</span>
@@ -941,7 +1093,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
                   </th>
                   <th
                     onClick={() => handleSort('asistencias')}
-                    className="p-3 text-center cursor-pointer hover:text-white"
+                    className={`p-3 text-center cursor-pointer ${isDark ? 'hover:text-white' : 'hover:text-red-600'}`}
                   >
                     <div className="flex items-center justify-center gap-1">
                       <span>ASI</span>
@@ -954,7 +1106,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
                   <th className="p-3 text-right">Ficha Individual</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700/40">
+              <tbody className={`divide-y ${isDark ? 'divide-slate-700/40' : 'divide-slate-200'}`}>
                 {filteredAndSortedStats.map((item) => {
                   const p = item.jugador;
                   return (
@@ -974,7 +1126,7 @@ export const StatsView: React.FC<StatsViewProps> = ({
                             <span className="font-bold block">
                               {p.nombre} {p.apellido}
                             </span>
-                            <span className="text-[10px] text-slate-400 font-normal">
+                            <span className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-500'} font-normal`}>
                               {p.nacionalidad || 'Chile'}
                             </span>
                           </div>
@@ -982,10 +1134,16 @@ export const StatsView: React.FC<StatsViewProps> = ({
                       </td>
 
                       {/* Posición */}
-                      <td className="p-3 text-slate-400">{p.posicion}</td>
+                      <td className={`p-3 ${isDark ? 'text-slate-400' : 'text-slate-600 font-medium'}`}>
+                        {p.posicion}
+                      </td>
 
                       {/* PJ */}
-                      <td className="p-3 text-center font-athletic font-bold text-sm text-emerald-400">
+                      <td
+                        className={`p-3 text-center font-athletic font-bold text-sm ${
+                          isDark ? 'text-emerald-400' : 'text-emerald-700 font-extrabold'
+                        }`}
+                      >
                         {item.partidosJugados}
                       </td>
 
@@ -994,11 +1152,21 @@ export const StatsView: React.FC<StatsViewProps> = ({
                         className="p-3 text-center text-[11px]"
                         title={`Titular: ${item.titularidades} | Entra de suplente: ${item.suplenciasConMinutos} | En banca sin min: ${item.suplenciasSinMinutos} | No citado: ${item.noCitado} | Suspendido: ${item.suspendido} | Lesionado: ${item.lesionado}`}
                       >
-                        <span className="text-emerald-400 font-bold">{item.titularidades}T</span>
+                        <span className={`font-bold ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
+                          {item.titularidades}T
+                        </span>
                         <span className="text-slate-500 mx-0.5">/</span>
-                        <span className="text-blue-400 font-semibold">{item.suplenciasConMinutos}S</span>
+                        <span className={`font-semibold ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>
+                          {item.suplenciasConMinutos}S
+                        </span>
                         {item.suplenciasSinMinutos > 0 && (
-                          <span className="text-[10px] text-slate-400 ml-1 font-mono">({item.suplenciasSinMinutos}b)</span>
+                          <span
+                            className={`text-[10px] ml-1 font-mono ${
+                              isDark ? 'text-slate-400' : 'text-slate-500'
+                            }`}
+                          >
+                            ({item.suplenciasSinMinutos}b)
+                          </span>
                         )}
                       </td>
 
@@ -1008,17 +1176,25 @@ export const StatsView: React.FC<StatsViewProps> = ({
                       </td>
 
                       {/* GOL */}
-                      <td className="p-3 text-center font-athletic font-bold text-sm text-red-500">
+                      <td className="p-3 text-center font-athletic font-bold text-sm text-red-600">
                         {item.golesTotales > 0 ? item.golesTotales : '-'}
                       </td>
 
                       {/* ASI */}
-                      <td className="p-3 text-center font-athletic font-bold text-sm text-blue-400">
+                      <td
+                        className={`p-3 text-center font-athletic font-bold text-sm ${
+                          isDark ? 'text-blue-400' : 'text-blue-700 font-extrabold'
+                        }`}
+                      >
                         {item.asistenciasTotales > 0 ? item.asistenciasTotales : '-'}
                       </td>
 
                       {/* TA */}
-                      <td className="p-3 text-center text-amber-400 font-bold">
+                      <td
+                        className={`p-3 text-center font-bold ${
+                          isDark ? 'text-amber-400' : 'text-amber-700'
+                        }`}
+                      >
                         {item.tarjetasAmarillasTotales > 0 ? item.tarjetasAmarillasTotales : '-'}
                       </td>
 
@@ -1031,14 +1207,22 @@ export const StatsView: React.FC<StatsViewProps> = ({
                       <td className="p-3 text-center">
                         {item.promedioTecnica !== undefined ? (
                           <div className="flex items-center justify-center gap-1 font-bold text-[11px]">
-                            <span className="text-blue-400">{item.promedioTecnica}</span>
+                            <span className={isDark ? 'text-blue-400' : 'text-blue-700'}>
+                              {item.promedioTecnica}
+                            </span>
                             <span className="text-slate-500">/</span>
-                            <span className="text-amber-400">{item.promedioTactica}</span>
+                            <span className={isDark ? 'text-amber-400' : 'text-amber-700'}>
+                              {item.promedioTactica}
+                            </span>
                             <span className="text-slate-500">/</span>
-                            <span className="text-red-400">{item.promedioCondicional}</span>
+                            <span className={isDark ? 'text-red-400' : 'text-red-700'}>
+                              {item.promedioCondicional}
+                            </span>
                           </div>
                         ) : (
-                          <span className="text-slate-500 text-[11px]">Sin eval.</span>
+                          <span className={`text-[11px] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                            Sin eval.
+                          </span>
                         )}
                       </td>
 

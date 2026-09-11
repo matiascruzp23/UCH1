@@ -159,8 +159,12 @@ export const Campograma: React.FC<CampogramaProps> = ({
             <span
               className={`text-xs font-bold px-2.5 py-1 rounded-md border ${
                 assignedCount === 11
-                  ? 'bg-emerald-600/20 text-emerald-400 border-emerald-500'
-                  : 'bg-red-600/20 text-red-400 border-red-500'
+                  ? isDark
+                    ? 'bg-emerald-600/20 text-emerald-400 border-emerald-500'
+                    : 'bg-emerald-100 text-emerald-800 border-emerald-400'
+                  : isDark
+                  ? 'bg-red-600/20 text-red-400 border-red-500'
+                  : 'bg-red-100 text-red-800 border-red-300'
               }`}
             >
               {assignedCount}/11 Titulares
@@ -535,7 +539,9 @@ export const Campograma: React.FC<CampogramaProps> = ({
                     <span
                       className={`text-[10px] px-1.5 py-0.2 rounded border ${
                         matchesCategory
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                          ? isDark
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                            : 'bg-emerald-100 text-emerald-800 border-emerald-300'
                           : isDark
                           ? 'bg-slate-700 text-slate-300 border-slate-600'
                           : 'bg-slate-200 text-slate-700 border-slate-300'
@@ -551,7 +557,9 @@ export const Campograma: React.FC<CampogramaProps> = ({
                         <Check className="w-3.5 h-3.5" /> Titular aquí
                       </span>
                     ) : isAssignedElsewhere ? (
-                      <span className="text-amber-400 italic">Mover de otro slot</span>
+                      <span className={`${isDark ? 'text-amber-400' : 'text-amber-700 font-semibold'} italic`}>
+                        Mover de otro slot
+                      </span>
                     ) : (
                       <span className={isDark ? 'text-blue-300/70' : 'text-slate-500'}>Seleccionar</span>
                     )}
